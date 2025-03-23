@@ -1,0 +1,96 @@
+version: '3'
+
+services:
+  mail:
+    image: mailhog/mailhog:v1.0.1
+    container_name: contrast.mail
+    environment:
+      - TZ=Asia/Tokyo
+      - MH_UI_WEB_PATH=mail
+      - MH_STORAGE=maildir
+      - MH_MAILDIR_PATH=/tmp
+    volumes:
+      - maildir:/tmp
+
+  mysql:
+    image: mysql:8.0.32
+    container_name: contrast.mysql
+    command: --log-bin-trust-function-creators=ON
+    cap_add:
+      - SYS_NICE  # CAP_SYS_NICE
+    environment:
+      - TZ=Asia/Tokyo
+      - MYSQL_ROOT_PASSWORD=default1!
+      - MYSQL_DATABASE=contrast
+      - MYSQL_USER=contrast
+      - MYSQL_PASSWORD=password
+    expose:
+      - '3306'
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  teamserver:
+    image: ghcr.io/contrast-security-inc/contrast:${EOP_VERSION:?err}
+    container_name: contrast.teamserver
+    depends_on:
+      - mail
+      - mysql
+    expose:
+      - '8080'
+    #ports:
+    #  - 8080:8080
+    environment:
+      - TZ=Asia/Tokyo
+    # LICENCE Setup:
+      # - CONTRAST_LICENSE=${CONTRAST_LICENSE}   #loaded via ENV
+      # Use Hub account to pull license
+      - CONTRAST_HUB_USERNAME=${HUB_USERNAME:?err}
+      - CONTRAST_HUB_PASSWORD=${HUB_PASSWORD:?err}
+    # MySQL Setup: 
+      # FOR REMOTE MySQL
+      # - CONTRAST_JDBC_URL=jdbc:mysql://<DNS of MYSQL>:3306/contrast
+      # - CONTRAST_JDBC_USER=contrast
+      # - CONTRAST_JDBC_PASS=<PASSWORD>
+      # FOR LOCALHOST MySQL
+      # - CONTRAST_JDBC_URL=jdbc:mysql://host.docker.internal:3306/contrast
+      # - CONTRAST_JDBC_USER=contrast
+      # - CONTRAST_JDBC_PASS=<PASSWORD>
+      # For a MySQL Container  --Uncomment 6 thru 15 and 20 & 21 along with the lines below.
+      - CONTRAST_JDBC_URL=jdbc:mysql://mysql:3306/contrast
+      - CONTRAST_JDBC_USER=contrast
+      - CONTRAST_JDBC_PASS=password
+    # SAML Setup
+      # - CONTRAST_AUTHENTICATOR_SAML_KEYSTORE_PASSWORD=changeit
+      # - CONTRAST_AUTHENTICATOR_SAML_KEYSTORE_PASSWORDMAP=some-alias=changeit
+    env_file:
+      - eop_version.env
+    volumes:
+      #- ./contrast_conf:/opt/contrast/conf
+      - contrast_data:/opt/contrast/data
+      - /tmp:/tmp
+    deploy: 
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 8g
+        reservations:
+          cpus: "1.0"
+          memory: 4g
+
+  nginx:
+    image: nginx:1.13
+    container_name: contrast.nginx
+    depends_on:
+      - teamserver
+    ports:
+      - 80:80
+    environment:
+      - TZ=Asia/Tokyo
+    volumes:
+      - ./nginx_conf:/etc/nginx/conf.d
+
+volumes:
+  contrast_data: {}
+  mysql_data: {}
+  maildir: {}
+

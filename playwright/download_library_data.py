@@ -29,16 +29,16 @@ def run(playwright: Playwright) -> None:
     with page.expect_download(timeout=180000) as download_md5_info:
         page.get_by_role("row", name="%s Contrast-Data-" % os.environ['LIB_DATA_DATE']).get_by_role("link", name="MD5 Sum").first.click()
     download_md5 = download_md5_info.value
-    file_md5_path = download_md5.path()
-    print(file_md5_path)
-    download_md5.save_as('/tmp/' + download_md5.suggested_filename)
+    #file_md5_path = download_md5.path()
+    #print(file_md5_path)
+    download_md5.save_as('/app/' + download_md5.suggested_filename)
 
     with page.expect_download(timeout=1800000) as download_zip_info:
         page.get_by_role("row", name="%s Contrast-Data-" % os.environ['LIB_DATA_DATE']).get_by_role("button").click()
     download_zip = download_zip_info.value
-    file_zip_path = download_zip.path()
-    print(file_zip_path)
-    download_zip.save_as('/tmp/' + download_zip.suggested_filename)
+    #file_zip_path = download_zip.path()
+    #print(file_zip_path)
+    download_zip.save_as('/app/' + download_zip.suggested_filename)
 
     context.close()
     browser.close()

@@ -65,7 +65,7 @@ services:
     volumes:
       #- ./contrast_conf:/opt/contrast/conf
       - contrast_data:/opt/contrast/data
-      - /tmp:/tmp
+      - /opt/contrast/work:/work
     deploy: 
       resources:
         limits:

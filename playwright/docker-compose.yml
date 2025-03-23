@@ -5,7 +5,7 @@ services:
       dockerfile: Dockerfile
     volumes:
       - .:/app
-      #- /tmp:/tmp
+      - /opt/contrast/work:/work
     environment:
       TZ: Asia/Tokyo
       CONTRAST_HUB_USERNAME: ${HUB_USERNAME:?err}

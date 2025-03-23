@@ -15,7 +15,7 @@ services:
   mysql:
     image: mysql:8.0.32
     container_name: contrast.mysql
-    command: --log-bin-trust-function-creators=ON
+    command: --local-infile=1 --log-bin-trust-function-creators=ON
     cap_add:
       - SYS_NICE  # CAP_SYS_NICE
     environment:

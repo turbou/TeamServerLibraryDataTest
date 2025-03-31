@@ -61,6 +61,19 @@
    ```
    (LicenseImporter.java:167) Insert records complete, time: 29628.671443673s
    ```
-   まっさらな状態から始めると約20時間かかります。二回目以降だと7時間ほど。
+   まっさらな状態から始めると約20時間かかります。二回目以降だと7時間ほど。  
    念の為さらに確認する場合は、アプリをオンボードして、ライブラリのライセンスやCVEが出るなども確認してください。
+
+## その他コマンド
+### TeamServerの停止
+- 単純に落とす場合
+  ```bash
+  docker-compose down
+  ```
+- まっさらにする場合
+  ```bash
+  docker-compose down --volumes
+  ```
+
+以上
 

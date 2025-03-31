@@ -16,7 +16,8 @@
    docker-compose up -d
    ```
    http://13.113.20.198/Contrast な感じで、TeamServerに接続できます。  
-   contrast_superadmin@contrastsecurity.com/XXXXXX でログインできます。XXXXXXは何方かに聞いてください。
+   contrast_superadmin@contrastsecurity.com/XXXXXX でログインできます。
+   XXXXXXは何方かに聞いてください。
 
 ## ライブラリデータの取得
 **playwrightディレクトリ内で作業をします。**
@@ -27,7 +28,7 @@
    ```properties
    LIB_DATA_DATE=03/28/2025
    ```
-   バージョンはMM/DD/YYYYのフォーマットです。
+   バージョンはMM/DD/YYYYのフォーマットです。  
    このバージョンはContrast Hubのライブラリデータのダウンロードページで確認してください。
 2. ライブラリデータを取得します。
    ```bash

@@ -66,14 +66,6 @@ services:
       #- ./contrast_conf:/opt/contrast/conf
       - contrast_data:/opt/contrast/data
       - /opt/contrast/work:/work
-    deploy: 
-      resources:
-        limits:
-          cpus: "2.0"
-          memory: 8g
-        reservations:
-          cpus: "1.0"
-          memory: 4g
 
   nginx:
     image: nginx:1.13

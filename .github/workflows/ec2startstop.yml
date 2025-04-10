@@ -1,0 +1,45 @@
+name: Control EC2 Instances
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'Action to perform on EC2 instance(s)'
+        required: true
+        type: choice
+        options:
+          - start
+          - stop
+      instance_ids:
+        description: 'List of EC2 Instance IDs (comma-separated)'
+        required: true
+        type: string
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  control_ec2:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ap-northeast-1
+          role-session-name: GitHubActions
+
+      - name: Start EC2 Instances
+        if: ${{ github.event.inputs.action == 'start' }}
+        run: |
+          aws ec2 start-instances --instance-ids ${{ github.event.inputs.instance_ids }}
+
+      - name: Stop EC2 Instances
+        if: ${{ github.event.inputs.action == 'stop' }}
+        run: |
+          aws ec2 stop-instances --instance-ids ${{ github.event.inputs.instance_ids }}
+

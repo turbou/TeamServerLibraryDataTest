@@ -51,5 +51,7 @@ jobs:
         run: |
           aws ssm wait command-executed \
             --command-id "${{ steps.library_data_download.outputs.COMMAND_ID }}" \
-            --instance-id "${{ github.event.inputs.instance_id }}"
+            --instance-id "${{ github.event.inputs.instance_id }}" \
+            --delay 60 \
+            --max-attempts 30
 

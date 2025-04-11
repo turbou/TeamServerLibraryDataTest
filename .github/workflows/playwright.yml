@@ -1,0 +1,41 @@
+name: Update EC2 File
+
+on:
+  workflow_dispatch:
+    inputs:
+      instance_id:
+        description: 'List of EC2 Instance ID'
+        required: true
+        type: string
+      lib_version:
+        description: 'MM/DD/YYYY'
+        required: true
+        type: string
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  update_file:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ap-northeast-1
+
+      - name: Update file on EC2 instance
+        run: |
+          aws ssm send-command \
+            --instance-ids "${{ github.event.inputs.instance_id }}" \
+            --document-name "AWS-RunShellScript" \
+            --parameters "commands=[\"sudo su - sed -i 's/LIB_DATA_DATE=.*$/LIB_DATA_DATE=${{ steps.get_instance_id.outputs.INSTANCE_ID }}' /root/git/TeamServerLibraryDataTest/playwright/lib_date.env\"]" \
+            --output text
+
+          echo "Successfully sent command to update file on instance: ${{ steps.get_instance_id.outputs.INSTANCE_ID }}"
+

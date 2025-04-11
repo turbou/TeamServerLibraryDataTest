@@ -39,11 +39,17 @@ jobs:
           echo "Successfully sent command to update file on instance: ${{ steps.get_instance_id.outputs.INSTANCE_ID }}"
 
       - name: Library Data Download by Docker
+        id: library_data_download
         run: |
-          aws ssm send-command \
+          COMMAND_OUTPUT=$(aws ssm send-command \
             --instance-ids "${{ github.event.inputs.instance_id }}" \
             --document-name "AWS-RunShellScript" \
             --parameters "commands=[\"sudo -i bash -c 'cd /root/git/TeamServerLibraryDataTest/playwright && docker-compose up'\"]" \
-            --output text
-          echo "Successfully sent command to download lib data on instance: ${{ steps.get_instance_id.outputs.INSTANCE_ID }}"
+            --output json)
+          echo "COMMAND_ID=$(echo "$COMMAND_OUTPUT" | jq -r '.Command.CommandId')" >> "$GITHUB_OUTPUT"
+      - name: Wait for Library Data Download Completion
+        run: |
+          aws ssm wait command-executed \
+            --command-id "${{ steps.library_data_download.outputs.COMMAND_ID }}" \
+            --instance-id "${{ github.event.inputs.instance_id }}"
 

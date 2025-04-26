@@ -4,9 +4,10 @@ on:
   workflow_dispatch:
     inputs:
       instance_id:
-        description: 'List of EC2 Instance ID'
+        description: 'EC2 Instance ID'
         required: true
         type: string
+        default: 'i-0df6b98aa8d86e49d'
       lib_version:
         description: 'MM/DD/YYYY'
         required: true

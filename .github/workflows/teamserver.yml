@@ -1,15 +1,15 @@
-name: Library Data Download
+name: Launch TeamServer Container
 
 on:
   workflow_dispatch:
     inputs:
       instance_id:
-        description: 'EC2 Instance ID'
+        description: 'List of EC2 Instance ID'
         required: true
         type: string
         default: 'i-0df6b98aa8d86e49d'
-      lib_version:
-        description: 'MM/DD/YYYY'
+      eop_version:
+        description: '3.12.0.13568004691'
         required: true
         type: string
 
@@ -30,22 +30,22 @@ jobs:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: ap-northeast-1
 
-      - name: Update Lib Data Version
+      - name: Update EOP Version
         run: |
           aws ssm send-command \
             --instance-ids "${{ github.event.inputs.instance_id }}" \
             --document-name "AWS-RunShellScript" \
-            --parameters "commands=[\"sudo sed -i 's#LIB_DATA_DATE=.*\$#LIB_DATA_DATE=${{ github.event.inputs.lib_version }}#' /root/git/TeamServerLibraryDataTest/playwright/lib_date.env\"]" \
+            --parameters "commands=[\"sudo sed -i 's#EOP_VERSION=.*\$#EOP_VERSION=${{ github.event.inputs.eop_version }}#' /root/git/TeamServerLibraryDataTest/eop/.env\"]" \
             --output text
           echo "Successfully sent command to update file on instance: ${{ steps.get_instance_id.outputs.INSTANCE_ID }}"
 
-      - name: Library Data Download by Docker Container
-        id: library_data_download
+      - name: Up TeamServer Container
+        id: teamserver_up
         run: |
           aws ssm send-command \
             --instance-ids "${{ github.event.inputs.instance_id }}" \
             --document-name "AWS-RunShellScript" \
-            --parameters "commands=[\"sudo -i bash -c 'cd /root/git/TeamServerLibraryDataTest/playwright && docker-compose up'\"]" \
+            --parameters "commands=[\"sudo -i bash -c 'cd /root/git/TeamServerLibraryDataTest/eop && docker-compose up'\"]" \
             --output text
-          echo "Successfully sent command to download lib data file on instance: ${{ steps.get_instance_id.outputs.INSTANCE_ID }}"
+          echo "Successfully sent command to launch TeamServer on instance: ${{ steps.get_instance_id.outputs.INSTANCE_ID }}"
 

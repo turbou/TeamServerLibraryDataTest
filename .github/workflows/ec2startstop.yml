@@ -14,6 +14,7 @@ on:
         description: 'List of EC2 Instance IDs (comma-separated)'
         required: true
         type: string
+        default: 'i-0df6b98aa8d86e49d'
 
 permissions:
   id-token: write

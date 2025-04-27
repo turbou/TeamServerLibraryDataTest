@@ -64,8 +64,7 @@ services:
       # - CONTRAST_AUTHENTICATOR_SAML_KEYSTORE_PASSWORDMAP=some-alias=changeit
     volumes:
       #- ./contrast_conf:/opt/contrast/conf
-      #- contrast_data:/opt/contrast/data
-      - /opt/contrast/data:/opt/contrast/data
+      - contrast_data:/opt/contrast/data
       - /opt/contrast/work:/work
 
   nginx:
@@ -81,7 +80,7 @@ services:
       - ./nginx_conf:/etc/nginx/conf.d
 
 volumes:
-  #contrast_data: {}
+  contrast_data: {}
   mysql_data: {}
   maildir: {}
 

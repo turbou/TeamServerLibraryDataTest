@@ -45,7 +45,26 @@ jobs:
           aws ssm send-command \
             --instance-ids "${{ github.event.inputs.instance_id }}" \
             --document-name "AWS-RunShellScript" \
-            --parameters "commands=[\"sudo -i bash -c 'cd /root/git/TeamServerLibraryDataTest/eop && docker-compose up'\"]" \
+            --parameters "commands=[\"sudo -i bash -c 'cd /root/git/TeamServerLibraryDataTest/eop && docker-compose -p eop up'\"]" \
             --output text
           echo "Successfully sent command to launch TeamServer on instance: ${{ steps.get_instance_id.outputs.INSTANCE_ID }}"
+
+      - name: Wait for TeamServer to start
+        id: wait_for_startup
+        run: |
+          MAX_RETRIES=20
+          SLEEP_SECONDS=30
+          for i in $(seq 1 $MAX_RETRIES); do
+            LOGS=$(docker-compose -p eop logs teamserver)
+            if echo "$LOGS" | grep -q " started on "; then
+              echo "TeamServer started successfully."
+              break
+            fi
+            echo "Waiting for TeamServer to start... (Attempt $i/$MAX_RETRIES)"
+            sleep $SLEEP_SECONDS
+            if [ $i -eq $MAX_RETRIES ]; then
+              echo "TeamServer did not start within the expected time."
+              exit 1
+            fi
+          done
 

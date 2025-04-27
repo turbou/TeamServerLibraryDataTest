@@ -47,15 +47,40 @@ jobs:
             --document-name "AWS-RunShellScript" \
             --parameters "commands=[\"sudo -i bash -c 'cd /root/git/TeamServerLibraryDataTest/eop && docker-compose -p eop up'\"]" \
             --output text
-          echo "Successfully sent command to launch TeamServer on instance: ${{ steps.get_instance_id.outputs.INSTANCE_ID }}"
+          echo "Successfully sent command to launch TeamServer on instance: ${{ github.event.inputs.instance_id }}"
 
-      - name: Wait for TeamServer to start
-        id: wait_for_startup
+      - name: Check for TeamServer to start
+        id: check_for_startup
         run: |
-          aws ssm send-command \
+          COMMAND_ID=$(aws ssm send-command \
             --instance-ids "${{ github.event.inputs.instance_id }}" \
             --document-name "AWS-RunShellScript" \
             --parameters "commands=[\"sudo -i bash -c 'cd /root/git/TeamServerLibraryDataTest/eop && ./started_check.sh'\"]" \
-            --output text
-          echo "Successfully sent command to confirm TeamServer started on instance: ${{ steps.get_instance_id.outputs.INSTANCE_ID }}"
+            --output text | awk '{print $2}')
+          echo "COMMAND_ID=$COMMAND_ID" >> $GITHUB_OUTPUT
+          echo "Successfully sent command to confirm TeamServer started on instance: ${{ github.event.inputs.instance_id }}"
+
+      - name: Wait for Command Completion
+        id: wait-command
+        run: |
+          COMMAND_ID="${{ steps.check_for_startup.outputs.COMMAND_ID }}"
+          echo "Waiting for command ID: $COMMAND_ID to complete..."
+          while true; do
+            STATUS=$(aws ssm get-command-invocation \
+              --command-id "$COMMAND_ID" \
+              --instance-id "${{ github.event.inputs.instance_id }}" \
+              --output text | grep "Status:" | awk '{print $2}')
+            echo "Current Status: $STATUS"
+            if [[ "$STATUS" == "Success" || "$STATUS" == "Failed" || "$STATUS" == "Cancelled" || "$STATUS" == "TimedOut" ]]; then
+              echo "Command execution finished with status: $STATUS"
+              break
+            fi
+            sleep 30
+          done
+          # 必要に応じて、コマンドの出力を取得する
+          OUTPUT=$(aws ssm get-command-invocation \
+            --command-id "$COMMAND_ID" \
+            --instance-id "${{ github.event.inputs.instance_id }}" \
+            --output text | grep "Stdout:" | awk '{$1=""; print $0}')
+          echo "Command Output: $OUTPUT"
 

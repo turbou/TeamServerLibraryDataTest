@@ -1,4 +1,4 @@
-name: Launch TeamServer Container
+name: Unzip Library Data
 
 on:
   workflow_dispatch:

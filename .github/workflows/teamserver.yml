@@ -64,8 +64,8 @@ jobs:
           echo "COMMAND_ID=$COMMAND_ID" >> $GITHUB_OUTPUT
           echo "Successfully sent command to confirm TeamServer started on instance: ${{ github.event.inputs.instance_id }}"
 
-      - name: Wait for Command Completion
-        id: wait-command
+      - name: Wait for Started Command Completion
+        id: wait_command_for_started
         run: |
           COMMAND_ID="${{ steps.check_for_startup.outputs.COMMAND_ID }}"
           echo "Waiting for command ID: $COMMAND_ID to complete..."
@@ -100,4 +100,33 @@ jobs:
             --parameters "commands=[\"sudo -i bash -c 'cd /root/git/TeamServerLibraryDataTest/playwright && docker-compose up'\"]" \
             --output text
           echo "Successfully sent command to download lib data file on instance: ${{ steps.get_instance_id.outputs.INSTANCE_ID }}"
+
+      - name: Check for Library Data Downloaded
+        id: check_for_lib_download
+        run: |
+          COMMAND_ID=$(aws ssm send-command \
+            --instance-ids "${{ github.event.inputs.instance_id }}" \
+            --document-name "AWS-RunShellScript" \
+            --parameters "commands=[\"sudo -i bash -c 'cd /root/git/TeamServerLibraryDataTest/playwright && ./md5sum_check.sh'\"]" \
+            --output json | jq -r '.Command.CommandId')
+          echo "COMMAND_ID=$COMMAND_ID" >> $GITHUB_OUTPUT
+          echo "Successfully sent command to confirm Library Downloaded on instance: ${{ github.event.inputs.instance_id }}"
+
+      - name: Wait for Download Command Completion
+        id: wait_command_for_download
+        run: |
+          COMMAND_ID="${{ steps.check_for_lib_download.outputs.COMMAND_ID }}"
+          echo "Waiting for command ID: $COMMAND_ID to complete..."
+          while true; do
+            STATUS=$(aws ssm get-command-invocation \
+              --command-id "$COMMAND_ID" \
+              --instance-id "${{ github.event.inputs.instance_id }}" \
+              --output json | jq -r '.Status')
+            echo "Current Status: $STATUS"
+            if [[ "$STATUS" == "Success" || "$STATUS" == "Failed" || "$STATUS" == "Cancelled" || "$STATUS" == "TimedOut" ]]; then
+              echo "Command execution finished with status: $STATUS"
+              break
+            fi
+            sleep 30
+          done
 

@@ -97,7 +97,7 @@ jobs:
           aws ssm send-command \
             --instance-ids "${{ github.event.inputs.instance_id }}" \
             --document-name "AWS-RunShellScript" \
-            --parameters "commands=[\"sudo -i bash -c 'cd /root/git/TeamServerLibraryDataTest/playwright && docker-compose up'\"]" \
+            --parameters "commands=[\"sudo -i bash -c 'cd /root/git/TeamServerLibraryDataTest/playwright && docker-compose -p playwright up'\"]" \
             --output text
           echo "Successfully sent command to download lib data file on instance: ${{ steps.get_instance_id.outputs.INSTANCE_ID }}"
 
@@ -125,8 +125,52 @@ jobs:
             echo "Current Status: $STATUS"
             if [[ "$STATUS" == "Success" || "$STATUS" == "Failed" || "$STATUS" == "Cancelled" || "$STATUS" == "TimedOut" ]]; then
               echo "Command execution finished with status: $STATUS"
+              aws ssm send-command \
+                --instance-ids "${{ github.event.inputs.instance_id }}" \
+                --document-name "AWS-RunShellScript" \
+                --parameters "commands=[\"sudo -i bash -c 'docker-compose -p playwright down --volumes'\"]" \
+                --output text
               break
             fi
             sleep 30
           done
+
+      - name: Unzip Library Data
+        id: unzip_library_data
+        run: |
+          COMMAND_ID=$(aws ssm send-command \
+            --instance-ids "${{ github.event.inputs.instance_id }}" \
+            --document-name "AWS-RunShellScript" \
+            --parameters "commands=[\"sudo -i bash -c 'docker-compose -p eop exec teamserver bash -c "cd /work && unzip Contrast-Data-Export-*.zip -d /opt/contrast/data/libraries/"'\"]" \
+            --output json | jq -r '.Command.CommandId')
+          echo "COMMAND_ID=$COMMAND_ID" >> $GITHUB_OUTPUT
+          echo "Successfully sent command to Unzip Library Data on instance: ${{ github.event.inputs.instance_id }}"
+
+      - name: Wait for Unzip Command Completion
+        id: wait_command_for_unzip
+        run: |
+          COMMAND_ID="${{ steps.unzip_library_data.outputs.COMMAND_ID }}"
+          echo "Waiting for command ID: $COMMAND_ID to complete..."
+          while true; do
+            STATUS=$(aws ssm get-command-invocation \
+              --command-id "$COMMAND_ID" \
+              --instance-id "${{ github.event.inputs.instance_id }}" \
+              --output json | jq -r '.Status')
+            echo "Current Status: $STATUS"
+            if [[ "$STATUS" == "Success" || "$STATUS" == "Failed" || "$STATUS" == "Cancelled" || "$STATUS" == "TimedOut" ]]; then
+              echo "Command execution finished with status: $STATUS"
+              break
+            fi
+            sleep 30
+          done
+
+      - name: Restart TeamServer Container
+        id: teamserver_restart
+        run: |
+          aws ssm send-command \
+            --instance-ids "${{ github.event.inputs.instance_id }}" \
+            --document-name "AWS-RunShellScript" \
+            --parameters "commands=[\"sudo -i bash -c 'docker-compose -p eop restart teamserver'\"]" \
+            --output text
+          echo "Successfully sent command to Restart TeamServer on instance: ${{ github.event.inputs.instance_id }}"
 

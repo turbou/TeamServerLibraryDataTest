@@ -32,7 +32,7 @@ jobs:
           COMMAND_ID=$(aws ssm send-command \
             --instance-ids "${{ github.event.inputs.instance_id }}" \
             --document-name "AWS-RunShellScript" \
-            --parameters "commands=[\"sudo -i bash -c 'docker-compose -p eop exec teamserver bash -c \\"cd /work && unzip Contrast-Data-Export-*.zip -d /opt/contrast/data/libraries/\\"'\"]" \
+            --parameters "commands=[\"sudo -i bash -c 'docker-compose -p eop exec teamserver bash -c \"cd /work && unzip Contrast-Data-Export-*.zip -d /opt/contrast/data/libraries/\"'\"]" \
             --output json | jq -r '.Command.CommandId')
           echo "COMMAND_ID=$COMMAND_ID" >> $GITHUB_OUTPUT
           echo "Successfully sent command to Unzip Library Data on instance: ${{ github.event.inputs.instance_id }}"

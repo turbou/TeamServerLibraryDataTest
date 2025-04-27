@@ -56,7 +56,7 @@ jobs:
             --instance-ids "${{ github.event.inputs.instance_id }}" \
             --document-name "AWS-RunShellScript" \
             --parameters "commands=[\"sudo -i bash -c 'cd /root/git/TeamServerLibraryDataTest/eop && ./started_check.sh'\"]" \
-            --output text | awk '{print $2}')
+            --output json | jq -r '.')
           echo "$COMMAND_ID"
           echo "COMMAND_ID=$COMMAND_ID" >> $GITHUB_OUTPUT
           echo "Successfully sent command to confirm TeamServer started on instance: ${{ github.event.inputs.instance_id }}"

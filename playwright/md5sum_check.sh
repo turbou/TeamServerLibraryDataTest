@@ -2,13 +2,27 @@
 
 DIRECTORY="/opt/contrast/work"
 CHECK_INTERVAL=60
-TIMEOUT=600
+TIMEOUT=180
 
-MD5SUM_FILE=`find $DIRECTORY -maxdepth 1 -name "*.zip-md5.txt"`
-if [ -z "$MD5SUM_FILE" ]; then
-  echo "エラー: MD5SUMファイル '$DIRECTORY/$MD5SUM_FILE' が存在しません。"
-  exit 1
-fi
+START_TIME=`date +%s`
+while true; do
+  TIMESTAMP=$(date "+%Y-%m-%d %H:%M:%S")
+  MD5SUM_FILE=`find $DIRECTORY -maxdepth 1 -name "*.zip-md5.txt"`
+  if [ -z "$MD5SUM_FILE" ]; then
+    echo "エラー: MD5SUMファイルが存在しません。"
+  else
+    echo "MD5SUMファイル '$MD5SUM_FILE' が見つかりました。"
+    break
+  fi
+  CURRENT_TIME=`date +%s`
+  ELAPSED_TIME=`expr "$CURRENT_TIME" - "$START_TIME"`
+  if [ "$ELAPSED_TIME" -ge "$TIMEOUT" ]; then
+    echo "Timeout reached (${TIMEOUT} seconds). Exiting."
+    exit 1
+  fi
+  echo "Waiting for ${CHECK_INTERVAL} seconds..."
+  sleep "$CHECK_INTERVAL"
+done
 
 base_name=`basename $MD5SUM_FILE .zip-md5.txt`
 ZIP_FILE="${DIRECTORY}/${base_name}.zip"
@@ -22,9 +36,9 @@ fi
 echo "期待するMD5SUM: $EXPECTED_MD5SUM"
 
 # チェック処理
+TIMEOUT=600
 START_TIME=`date +%s`
 while true; do
-  RETRIES=$((RETRIES + 1))
   TIMESTAMP=$(date "+%Y-%m-%d %H:%M:%S")
   if [ -f "$ZIP_FILE" ]; then
     echo "$TIMESTAMP: ZIPファイル '$ZIP_FILE' が存在します。MD5SUMを計算します..."

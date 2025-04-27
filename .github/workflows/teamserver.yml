@@ -77,10 +77,23 @@ jobs:
             fi
             sleep 30
           done
-          # 必要に応じて、コマンドの出力を取得する
-          OUTPUT=$(aws ssm get-command-invocation \
-            --command-id "$COMMAND_ID" \
-            --instance-id "${{ github.event.inputs.instance_id }}" \
-            --output text | grep "Stdout:" | awk '{$1=""; print $0}')
-          echo "Command Output: $OUTPUT"
+
+      - name: Update Lib Data Version
+        run: |
+          aws ssm send-command \
+            --instance-ids "${{ github.event.inputs.instance_id }}" \
+            --document-name "AWS-RunShellScript" \
+            --parameters "commands=[\"sudo sed -i 's#LIB_DATA_DATE=.*\$#LIB_DATA_DATE=${{ github.event.inputs.lib_version }}#' /root/git/TeamServerLibraryDataTest/playwright/lib_date.env\"]" \
+            --output text
+          echo "Successfully sent command to update file on instance: ${{ steps.get_instance_id.outputs.INSTANCE_ID }}"
+
+      - name: Library Data Download by Docker Container
+        id: library_data_download
+        run: |
+          aws ssm send-command \
+            --instance-ids "${{ github.event.inputs.instance_id }}" \
+            --document-name "AWS-RunShellScript" \
+            --parameters "commands=[\"sudo -i bash -c 'cd /root/git/TeamServerLibraryDataTest/playwright && docker-compose up'\"]" \
+            --output text
+          echo "Successfully sent command to download lib data file on instance: ${{ steps.get_instance_id.outputs.INSTANCE_ID }}"
 

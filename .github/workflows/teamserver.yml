@@ -12,6 +12,10 @@ on:
         description: '3.12.0.13568004691'
         required: true
         type: string
+      lib_version:
+        description: 'MM/DD/YYYY'
+        required: true
+        type: string
 
 permissions:
   id-token: write

@@ -4,16 +4,16 @@ on:
   workflow_dispatch:
     inputs:
       instance_id:
-        description: 'List of EC2 Instance ID'
+        description: 'EC2 Instance ID'
         required: true
         type: string
         default: 'i-0df6b98aa8d86e49d'
       eop_version:
-        description: '3.12.0.13568004691'
+        description: 'EOP Version e.g., 3.12.0.13568004691'
         required: true
         type: string
       lib_filename:
-        description: 'Contrast-Data-Export-202504211116.zip'
+        description: 'Lib FileName e.g., Contrast-Data-Export-202504211116.zip'
         required: true
         type: string
 

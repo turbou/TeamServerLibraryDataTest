@@ -13,7 +13,7 @@
 
 2. TeamServerを起動
    ```bash
-   docker-compose up -d
+   docker-compose -p eop up -d
    ```
    http://13.113.20.198/Contrast な感じで、TeamServerに接続できます。  
    contrast_superadmin@contrastsecurity.com/XXXXXX でログインできます。
@@ -23,13 +23,12 @@
 **playwrightディレクトリ内で作業をします。**
 1. ライブラリデータのバージョンを指定します。
    ```bash
-   vim lib_date.env
+   vim lib_data.env
    ```
    ```properties
-   LIB_DATA_DATE=03/28/2025
+   FILE_NAME=Contrast-Data-Export-202504211116.zip
    ```
-   バージョンはMM/DD/YYYYのフォーマットです。  
-   このバージョンはContrast Hubのライブラリデータのダウンロードページで確認してください。
+   このファイル名はContrast Hubのライブラリデータのダウンロードページで確認してください。
 2. ライブラリデータを取得します。
    ```bash
    docker-compose up
@@ -69,11 +68,11 @@
 ### TeamServerの停止
 - 単純に落とす場合
   ```bash
-  docker-compose down
+  docker-compose -p eop down
   ```
 - まっさらにする場合
   ```bash
-  docker-compose down --volumes
+  docker-compose -p eop down --volumes
   ```
 
 以上

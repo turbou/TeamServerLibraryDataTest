@@ -1,0 +1,176 @@
+name: Library Data Auto-Validation
+
+on:
+  workflow_dispatch:
+    inputs:
+      instance_id:
+        description: 'EC2 Instance ID'
+        required: true
+        type: string
+        default: 'i-0df6b98aa8d86e49d'
+      eop_version:
+        description: 'EOP Version e.g., 3.12.0.13568004691'
+        required: true
+        type: string
+      lib_filename:
+        description: 'Lib FileName e.g., Contrast-Data-Export-202504211116.zip'
+        required: true
+        type: string
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  update_file:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ap-northeast-1
+
+      - name: Reconfigure EOP Version
+        run: |
+          aws ssm send-command \
+            --instance-ids "${{ github.event.inputs.instance_id }}" \
+            --document-name "AWS-RunShellScript" \
+            --parameters "commands=[\"sudo sed -i 's#EOP_VERSION=.*\$#EOP_VERSION=${{ github.event.inputs.eop_version }}#' /root/git/TeamServerLibraryDataTest/eop/.env\"]" \
+            --output text
+          echo "Successfully sent command to update file on instance: ${{ steps.get_instance_id.outputs.INSTANCE_ID }}"
+
+      - name: TeamServer Container Startup
+        id: teamserver_up
+        run: |
+          aws ssm send-command \
+            --instance-ids "${{ github.event.inputs.instance_id }}" \
+            --document-name "AWS-RunShellScript" \
+            --parameters "commands=[\"sudo -i bash -c 'cd /root/git/TeamServerLibraryDataTest/eop && docker-compose -p eop up'\"]" \
+            --output text
+          echo "Successfully sent command to launch TeamServer on instance: ${{ github.event.inputs.instance_id }}"
+
+      - name: TeamServer Running Status Check
+        id: check_for_startup
+        run: |
+          COMMAND_ID=$(aws ssm send-command \
+            --instance-ids "${{ github.event.inputs.instance_id }}" \
+            --document-name "AWS-RunShellScript" \
+            --parameters "commands=[\"sudo -i bash -c 'cd /root/git/TeamServerLibraryDataTest/eop && ./started_check.sh'\"]" \
+            --output json | jq -r '.Command.CommandId')
+          echo "COMMAND_ID=$COMMAND_ID" >> $GITHUB_OUTPUT
+          echo "Successfully sent command to confirm TeamServer started on instance: ${{ github.event.inputs.instance_id }}"
+
+      - name: Wait for TeamServer Running Status Check
+        id: wait_command_for_started
+        run: |
+          COMMAND_ID="${{ steps.check_for_startup.outputs.COMMAND_ID }}"
+          echo "Waiting for command ID: $COMMAND_ID to complete..."
+          while true; do
+            STATUS=$(aws ssm get-command-invocation \
+              --command-id "$COMMAND_ID" \
+              --instance-id "${{ github.event.inputs.instance_id }}" \
+              --output json | jq -r '.Status')
+            echo "Current Status: $STATUS"
+            if [[ "$STATUS" == "Success" || "$STATUS" == "Failed" || "$STATUS" == "Cancelled" || "$STATUS" == "TimedOut" ]]; then
+              echo "Command execution finished with status: $STATUS"
+              break
+            fi
+            sleep 30
+          done
+
+      - name: Reconfigure Library Data Filename
+        run: |
+          aws ssm send-command \
+            --instance-ids "${{ github.event.inputs.instance_id }}" \
+            --document-name "AWS-RunShellScript" \
+            --parameters "commands=[\"sudo sed -i 's#FILE_NAME=.*\$#FILE_NAME=${{ github.event.inputs.lib_filename }}#' /root/git/TeamServerLibraryDataTest/playwright/lib_data.env\"]" \
+            --output text
+          echo "Successfully sent command to update file on instance: ${{ steps.get_instance_id.outputs.INSTANCE_ID }}"
+
+      - name: Download Library Data via Playwright Container
+        id: library_data_download
+        run: |
+          aws ssm send-command \
+            --instance-ids "${{ github.event.inputs.instance_id }}" \
+            --document-name "AWS-RunShellScript" \
+            --parameters "commands=[\"sudo -i bash -c 'cd /root/git/TeamServerLibraryDataTest/playwright && docker-compose -p playwright up'\"]" \
+            --output text
+          echo "Successfully sent command to download lib data file on instance: ${{ steps.get_instance_id.outputs.INSTANCE_ID }}"
+
+      - name: Library Data Download Completion Check
+        id: check_for_lib_download
+        run: |
+          COMMAND_ID=$(aws ssm send-command \
+            --instance-ids "${{ github.event.inputs.instance_id }}" \
+            --document-name "AWS-RunShellScript" \
+            --parameters "commands=[\"sudo -i bash -c 'cd /root/git/TeamServerLibraryDataTest/playwright && ./md5sum_check.sh'\"]" \
+            --output json | jq -r '.Command.CommandId')
+          echo "COMMAND_ID=$COMMAND_ID" >> $GITHUB_OUTPUT
+          echo "Successfully sent command to confirm Library Downloaded on instance: ${{ github.event.inputs.instance_id }}"
+
+      - name: Wait for Library Data Download Completion Check
+        id: wait_command_for_download
+        run: |
+          COMMAND_ID="${{ steps.check_for_lib_download.outputs.COMMAND_ID }}"
+          echo "Waiting for command ID: $COMMAND_ID to complete..."
+          while true; do
+            STATUS=$(aws ssm get-command-invocation \
+              --command-id "$COMMAND_ID" \
+              --instance-id "${{ github.event.inputs.instance_id }}" \
+              --output json | jq -r '.Status')
+            echo "Current Status: $STATUS"
+            if [[ "$STATUS" == "Success" || "$STATUS" == "Failed" || "$STATUS" == "Cancelled" || "$STATUS" == "TimedOut" ]]; then
+              echo "Command execution finished with status: $STATUS"
+              aws ssm send-command \
+                --instance-ids "${{ github.event.inputs.instance_id }}" \
+                --document-name "AWS-RunShellScript" \
+                --parameters "commands=[\"sudo -i bash -c 'docker-compose -p playwright down --volumes'\"]" \
+                --output text
+              break
+            fi
+            sleep 30
+          done
+
+      - name: Unzip Library Data File
+        id: unzip_library_data
+        run: |
+          COMMAND_ID=$(aws ssm send-command \
+            --instance-ids "${{ github.event.inputs.instance_id }}" \
+            --document-name "AWS-RunShellScript" \
+            --parameters "commands=[\"sudo -i bash -c 'cd /root/git/TeamServerLibraryDataTest/eop && ./unzip.sh'\"]" \
+            --output json | jq -r '.Command.CommandId')
+          echo "COMMAND_ID=$COMMAND_ID" >> $GITHUB_OUTPUT
+          echo "Successfully sent command to Unzip Library Data on instance: ${{ github.event.inputs.instance_id }}"
+
+      - name: Wait for Unzip Library Data File
+        id: wait_command_for_unzip
+        run: |
+          COMMAND_ID="${{ steps.unzip_library_data.outputs.COMMAND_ID }}"
+          echo "Waiting for command ID: $COMMAND_ID to complete..."
+          while true; do
+            STATUS=$(aws ssm get-command-invocation \
+              --command-id "$COMMAND_ID" \
+              --instance-id "${{ github.event.inputs.instance_id }}" \
+              --output json | jq -r '.Status')
+            echo "Current Status: $STATUS"
+            if [[ "$STATUS" == "Success" || "$STATUS" == "Failed" || "$STATUS" == "Cancelled" || "$STATUS" == "TimedOut" ]]; then
+              echo "Command execution finished with status: $STATUS"
+              break
+            fi
+            sleep 30
+          done
+
+      - name: Restart TeamServer Container
+        id: teamserver_restart
+        run: |
+          aws ssm send-command \
+            --instance-ids "${{ github.event.inputs.instance_id }}" \
+            --document-name "AWS-RunShellScript" \
+            --parameters "commands=[\"sudo -i bash -c 'docker-compose -p eop restart teamserver'\"]" \
+            --output text
+          echo "Successfully sent command to Restart TeamServer on instance: ${{ github.event.inputs.instance_id }}"
+

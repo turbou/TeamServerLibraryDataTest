@@ -11,7 +11,7 @@ services:
       CONTRAST_HUB_USERNAME: ${HUB_USERNAME:?err}
       CONTRAST_HUB_PASSWORD: ${HUB_PASSWORD:?err}
     env_file:
-      - lib_date.env
+      - lib_data.env
     working_dir: /app
     command: python download_library_data.py
 

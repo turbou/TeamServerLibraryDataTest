@@ -8,8 +8,8 @@ on:
         required: true
         type: string
         default: 'i-0df6b98aa8d86e49d'
-      lib_version:
-        description: 'MM/DD/YYYY'
+      lib_filename:
+        description: 'Contrast-Data-Export-202504211116.zip'
         required: true
         type: string
 
@@ -35,7 +35,7 @@ jobs:
           aws ssm send-command \
             --instance-ids "${{ github.event.inputs.instance_id }}" \
             --document-name "AWS-RunShellScript" \
-            --parameters "commands=[\"sudo sed -i 's#LIB_DATA_DATE=.*\$#LIB_DATA_DATE=${{ github.event.inputs.lib_version }}#' /root/git/TeamServerLibraryDataTest/playwright/lib_date.env\"]" \
+            --parameters "commands=[\"sudo sed -i 's#FILE_NAME=.*\$#FILE_NAME=${{ github.event.inputs.lib_filename }}#' /root/git/TeamServerLibraryDataTest/playwright/lib_data.env\"]" \
             --output text
           echo "Successfully sent command to update file on instance: ${{ steps.get_instance_id.outputs.INSTANCE_ID }}"
 

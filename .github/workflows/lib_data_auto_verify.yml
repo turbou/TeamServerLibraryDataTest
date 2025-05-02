@@ -1,4 +1,4 @@
-name: Launch TeamServer Container
+name: Library Data Auto-Validation
 
 on:
   workflow_dispatch:
@@ -34,7 +34,7 @@ jobs:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: ap-northeast-1
 
-      - name: Update EOP Version
+      - name: Reconfigure EOP Version
         run: |
           aws ssm send-command \
             --instance-ids "${{ github.event.inputs.instance_id }}" \
@@ -43,7 +43,7 @@ jobs:
             --output text
           echo "Successfully sent command to update file on instance: ${{ steps.get_instance_id.outputs.INSTANCE_ID }}"
 
-      - name: Up TeamServer Container
+      - name: TeamServer Container Startup
         id: teamserver_up
         run: |
           aws ssm send-command \
@@ -53,7 +53,7 @@ jobs:
             --output text
           echo "Successfully sent command to launch TeamServer on instance: ${{ github.event.inputs.instance_id }}"
 
-      - name: Check for TeamServer to start
+      - name: TeamServer Running Status Check
         id: check_for_startup
         run: |
           COMMAND_ID=$(aws ssm send-command \
@@ -64,7 +64,7 @@ jobs:
           echo "COMMAND_ID=$COMMAND_ID" >> $GITHUB_OUTPUT
           echo "Successfully sent command to confirm TeamServer started on instance: ${{ github.event.inputs.instance_id }}"
 
-      - name: Wait for Started Command Completion
+      - name: Wait for TeamServer Running Status Check
         id: wait_command_for_started
         run: |
           COMMAND_ID="${{ steps.check_for_startup.outputs.COMMAND_ID }}"
@@ -82,7 +82,7 @@ jobs:
             sleep 30
           done
 
-      - name: Update Lib Data Version
+      - name: Reconfigure Library Data Filename
         run: |
           aws ssm send-command \
             --instance-ids "${{ github.event.inputs.instance_id }}" \
@@ -91,7 +91,7 @@ jobs:
             --output text
           echo "Successfully sent command to update file on instance: ${{ steps.get_instance_id.outputs.INSTANCE_ID }}"
 
-      - name: Library Data Download by Docker Container
+      - name: Download Library Data via Playwright Container
         id: library_data_download
         run: |
           aws ssm send-command \
@@ -101,7 +101,7 @@ jobs:
             --output text
           echo "Successfully sent command to download lib data file on instance: ${{ steps.get_instance_id.outputs.INSTANCE_ID }}"
 
-      - name: Check for Library Data Downloaded
+      - name: Library Data Download Completion Check
         id: check_for_lib_download
         run: |
           COMMAND_ID=$(aws ssm send-command \
@@ -112,7 +112,7 @@ jobs:
           echo "COMMAND_ID=$COMMAND_ID" >> $GITHUB_OUTPUT
           echo "Successfully sent command to confirm Library Downloaded on instance: ${{ github.event.inputs.instance_id }}"
 
-      - name: Wait for Download Command Completion
+      - name: Wait for Library Data Download Completion Check
         id: wait_command_for_download
         run: |
           COMMAND_ID="${{ steps.check_for_lib_download.outputs.COMMAND_ID }}"
@@ -135,7 +135,7 @@ jobs:
             sleep 30
           done
 
-      - name: Unzip Library Data
+      - name: Unzip Library Data File
         id: unzip_library_data
         run: |
           COMMAND_ID=$(aws ssm send-command \
@@ -146,7 +146,7 @@ jobs:
           echo "COMMAND_ID=$COMMAND_ID" >> $GITHUB_OUTPUT
           echo "Successfully sent command to Unzip Library Data on instance: ${{ github.event.inputs.instance_id }}"
 
-      - name: Wait for Unzip Command Completion
+      - name: Wait for Unzip Library Data File
         id: wait_command_for_unzip
         run: |
           COMMAND_ID="${{ steps.unzip_library_data.outputs.COMMAND_ID }}"

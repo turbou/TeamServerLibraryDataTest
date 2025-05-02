@@ -67,6 +67,20 @@ services:
       - contrast_data:/opt/contrast/data
       - /opt/contrast/work:/work
 
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:5.2.2
+    container_name: contrast.phpmyadmin
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      PMA_ARBITRARY: 0
+      MYSQL_ROOT_PASSWORD: default1!
+      MYSQL_DATABASE: contrast
+      MYSQL_USER: contrast
+      MYSQL_PASSWORD: password
+    depends_on:
+      - mysql
+
   nginx:
     image: nginx:1.13
     container_name: contrast.nginx

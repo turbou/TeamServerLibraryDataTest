@@ -32,3 +32,42 @@ OICD使ったパイプライン.xlsxに沿って、以下の必要なAWSリソ�
    ssh -i Taka.pem ec2-user@18.176.117.9
    ```
 ## EC2起動後作業（インスタンス内）
+1. ホスト名の設定
+   ```bash
+   hostnamectl set-hostname teamserver4ldc
+   ```
+2. dockerのインストール
+   ```bash
+   # インストール可能なバージョンを確認する場合
+   dnf search --showduplicates docker
+   # dockerインストール
+   dnf install -y docker-20.10.25-1.amzn2023.0.1.x86_64
+   # docker-composeのインストール
+   curl -L "https://github.com/docker/compose/releases/download/v2.33.1/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+   chmod +x /usr/local/bin/docker-compose
+   # 確認
+   docker -v
+   docker-compose -v
+   ```
+3. vimの初期設定（任意）
+   ```bash
+   vim ~/.vimrc
+   ```
+   ```
+   set nu
+   set noai
+   set nobackup
+   set paste
+   set expandtab
+   set tabstop=4
+   set shiftwidth=4
+   set noswapfile
+   syntax on
+   ```
+4. 本Githubリポジトリのgit clone
+   ```bash
+   dnf install -y git
+   ```
+   ```bash
+   git clone https://github.com/turbou/TeamServerLibraryDataTest.git
+   ```

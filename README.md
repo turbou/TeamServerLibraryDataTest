@@ -25,10 +25,10 @@
    `contrast_superadmin@contrastsecurity.com/default1!` でログインできます。  
    それ以外のコンテナへのログインは以下のとおりです。  
    - mailhog  
-     http://13.113.20.198/mail  
+     http://13.113.20.198/mail/  
      mailhogをメールサーバとして利用できます。`ホスト: mail, ポート: 1025`
    - phpmyadmin  
-     http://13.113.20.198/phpmyadmin  
+     http://13.113.20.198/phpmyadmin/  
      `contrast/password`
 
 ## ライブラリデータの取得

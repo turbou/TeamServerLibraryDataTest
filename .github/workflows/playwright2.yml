@@ -14,7 +14,7 @@ permissions:
   contents: read
 
 jobs:
-  update_file:
+  create_organization:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository

@@ -8,7 +8,8 @@ OICD使ったパイプライン.xlsxに沿って、以下の必要なAWSリソ�
 
 ## EC2インスタンスの作成
 **ContrastのAWS Salesで作業する場合は、OktaSEAdminのロールが必要です。**  
-- Name: TeamServerForLibraryDataCheck
+- Nameタグ: `ForTeamServerLibraryDataTest-`で始まる名前に必ずしてください。  
+  Githubアクション用IAMロールの許容EC2インスタンスのルールとして`ForTeamServerLibraryDataTest-`で始めることを前提にしています。
 - AMI: Amazon Linux 2023 AMI
 - アーキテクチャ: 64ビット(x86)
 - インスタンスタイプ: xlarge以上（ここではt3a.xlargeで作成)

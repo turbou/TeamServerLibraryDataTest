@@ -69,5 +69,6 @@ OICD使ったパイプライン.xlsxに沿って、以下の必要なAWSリソ�
    dnf install -y git
    ```
    ```bash
+   mkdir git && cd git
    git clone https://github.com/turbou/TeamServerLibraryDataTest.git
    ```

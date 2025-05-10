@@ -72,3 +72,5 @@ OICD使ったパイプライン.xlsxに沿って、以下の必要なAWSリソ�
    mkdir git && cd git
    git clone https://github.com/turbou/TeamServerLibraryDataTest.git
    ```
+
+以上

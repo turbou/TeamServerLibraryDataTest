@@ -32,7 +32,7 @@ jobs:
           aws ssm send-command \
             --instance-ids "${{ github.event.inputs.instance_id }}" \
             --document-name "AWS-RunShellScript" \
-            --parameters "commands=[\"sudo -i bash -c 'cd /root/git/TeamServerLibraryDataTest/playwright2 && docker-compose up'\"]" \
+            --parameters "commands=[\"sudo -i bash -c 'cd /root/git/TeamServerLibraryDataTest/playwright2 && docker-compose -p eop up'\"]" \
             --output text
           echo "Successfully sent command to create organization on instance: ${{ steps.get_instance_id.outputs.INSTANCE_ID }}"
 

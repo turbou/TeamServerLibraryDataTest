@@ -7,7 +7,7 @@ def run(playwright: Playwright) -> None:
     browser = playwright.chromium.launch(headless=True)
     context = browser.new_context()
     page = context.new_page()
-    page.goto("http://127.0.0.1/Contrast/static/ng/index.html#/pages/signin")
+    page.goto("http://contrast.nginx/Contrast/static/ng/index.html#/pages/signin")
     page.get_by_test_id("username-email").click()
     page.get_by_test_id("username-email").fill("contrast_superadmin@contrastsecurity.com")
     page.get_by_test_id("password").click()

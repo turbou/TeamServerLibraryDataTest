@@ -2,7 +2,13 @@
 
 ## オンプレ版TeamServerの起動
 **eopディレクトリ内で作業をします。**
-1. TeamServerのバージョンを指定します。
+1. Contrast Hubの認証情報を環境変数にセットします。
+   .bash_profileに設定する場合
+   ```bash
+   export HUB_USERNAME=XXXXX@contrastsecurity.com
+   export HUB_PASSWORD=XXXXXXXXXXXXXXX
+   ```
+3. TeamServerのバージョンを指定します。
    ```bash
    vim .env
    ```

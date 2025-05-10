@@ -21,7 +21,7 @@
    ```bash
    docker-compose -p eop up -d
    ```
-   http://13.113.20.198/Contrast な感じで、TeamServerに接続できます。  
+   http://13.113.20.198/Contrast/ な感じで、TeamServerに接続できます。  
    `contrast_superadmin@contrastsecurity.com/default1!` でログインできます。  
    それ以外のコンテナへのログインは以下のとおりです。  
    - mailhog  

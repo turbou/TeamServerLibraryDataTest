@@ -1,5 +1,6 @@
 services:
-  playwright:
+  playwright2:
+    container_name: playwright2
     build:
       context: .
       dockerfile: Dockerfile

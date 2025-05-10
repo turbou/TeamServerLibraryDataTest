@@ -2,7 +2,13 @@
 
 ## オンプレ版TeamServerの起動
 **eopディレクトリ内で作業をします。**
-1. TeamServerのバージョンを指定します。
+1. Contrast Hubの認証情報を環境変数にセットします。
+   .bash_profileに設定する場合
+   ```bash
+   export HUB_USERNAME=XXXXX@contrastsecurity.com
+   export HUB_PASSWORD=XXXXXXXXXXXXXXX
+   ```
+3. TeamServerのバージョンを指定します。
    ```bash
    vim .env
    ```
@@ -11,13 +17,19 @@
    ```
    このバージョンは、[EOPバージョン一覧](https://github.com/orgs/contrast-security-inc/packages/container/package/contrast) から確認してください。
 
-2. TeamServerを起動
+2. TeamServerを含むコンテナ郡を起動
    ```bash
    docker-compose -p eop up -d
    ```
-   http://13.113.20.198/Contrast な感じで、TeamServerに接続できます。  
-   contrast_superadmin@contrastsecurity.com/XXXXXX でログインできます。
-   XXXXXXは何方かに聞いてください。
+   http://13.113.20.198/Contrast/ な感じで、TeamServerに接続できます。  
+   `contrast_superadmin@contrastsecurity.com/default1!` でログインできます。  
+   それ以外のコンテナへのログインは以下のとおりです。  
+   - mailhog  
+     http://13.113.20.198/mail/  
+     mailhogをメールサーバとして利用できます。`ホスト: mail, ポート: 1025`
+   - phpmyadmin  
+     http://13.113.20.198/phpmyadmin/  
+     `contrast/password`
 
 ## ライブラリデータの取得
 **playwrightディレクトリ内で作業をします。**

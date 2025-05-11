@@ -22,9 +22,17 @@ permissions:
   contents: read
 
 jobs:
-  update_file:
+  lib_data_auto_verify:
     runs-on: ubuntu-latest
     steps:
+      - name: Output Input Parameters
+        run: |
+          echo "--------------- Input Parameters ---------------"
+          echo "Instance Id      : ${{ github.event.inputs.instance_id}}"
+          echo "EOP Version      : ${{ github.event.inputs.eop_version }}"
+          echo "Library Data File: ${{ github.event.inputs.lib_filename }}"
+          echo "------------------------------------------------"
+
       - name: Checkout repository
         uses: actions/checkout@v4
 

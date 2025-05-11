@@ -1,0 +1,12 @@
+services:
+  log_monitor:
+    container_name: log_monitor
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./log_monitor.py:/app/log_monitor.py
+    command: ["python", "/app/log_monitor.py"]
+    restart: "no"
+

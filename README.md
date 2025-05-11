@@ -67,7 +67,7 @@
 3. ログを監視します。
    これもホスト側のeop/下で実行します。
    ```bash
-   docker-compose logs -f teamserver | egrep 'Beginning CSV import|completed,|complete,'
+   docker-compose -p eop logs -f teamserver | egrep 'Beginning CSV import|completed,|complete,'
    ```
    このログが出たら読み込み完了です。一応、/opt/contrast/data/libraries/下が空っぽになっていることも確認してください。
    ```

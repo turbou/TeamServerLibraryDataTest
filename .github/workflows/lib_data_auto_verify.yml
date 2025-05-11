@@ -162,13 +162,21 @@ jobs:
           COMMAND_ID="${{ steps.unzip_library_data.outputs.COMMAND_ID }}"
           echo "Waiting for command ID: $COMMAND_ID to complete..."
           while true; do
-            STATUS=$(aws ssm get-command-invocation \
+            INVOCATION=$(aws ssm get-command-invocation \
               --command-id "$COMMAND_ID" \
               --instance-id "${{ github.event.inputs.instance_id }}" \
-              --output json | jq -r '.Status')
+              --output json)
+            STATUS=$(echo "$INVOCATION" | jq -r '.Status')
             echo "Current Status: $STATUS"
             if [[ "$STATUS" == "Success" || "$STATUS" == "Failed" || "$STATUS" == "Cancelled" || "$STATUS" == "TimedOut" ]]; then
-              echo "Command execution finished with status: $STATUS"
+              EXIT_CODE=$(echo "$INVOCATION" | jq -r '.CommandPlugins[0].Output.ExitCode')
+              echo "Command execution finished with status: $STATUS, Exit Code: $EXIT_CODE"
+              if [[ "$EXIT_CODE" -eq 0 ]]; then
+                echo "Command succeeded with exit code 0."
+              else
+                echo "Command finished successfully but with a non-zero exit code: $EXIT_CODE."
+                exit 1
+              fi
               break
             fi
             sleep 30

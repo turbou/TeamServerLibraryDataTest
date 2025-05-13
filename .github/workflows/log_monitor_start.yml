@@ -1,4 +1,4 @@
-name: Library Data Auto-Validation
+name: Log Monitoring Start
 
 on:
   workflow_dispatch:

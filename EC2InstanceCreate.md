@@ -73,5 +73,14 @@ OICD使ったパイプライン.xlsxに沿って、以下の必要なAWSリソ�
    mkdir git && cd git
    git clone https://github.com/turbou/TeamServerLibraryDataTest.git
    ```
+5. Contrast Hubの認証情報の環境変数を`.bash_profile`に設定
+   ```bash
+   vim ~/.bash_profile
+   ```
+   ```bash
+   # User specific environment and startup programs
+   export HUB_USERNAME=xxxx.yyyyyy@contrastsecurity.com
+   export HUB_PASSWORD=XXXXXXXXXXXXXXXXXX
+   ```
 
 以上

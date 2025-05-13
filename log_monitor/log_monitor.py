@@ -119,9 +119,10 @@ def monitor_logs():
                     print(f"CSV読み込み完了: {date_object.strftime('%Y-%m-%d %H:%M:%S')}")
                     print(f"所要時間: {hours}時間 {minutes}分")
                     message = {
-                        "CONTRAST_URL": "http://18.176.117.9/Contrast/",
-                        "HOURS": f"所要時間: {hours}時間 {minutes}分"
+                        "CONTRAST_URL": f"http://{os.environ['EIP']}/Contrast/",
+                        "HOURS": f"所要時間: {hours}時間 {minutes}分 (os.environ['INSTANCE_TYPE'])"
                     }
+                    print(message)
                     #post_slack_message(message)
                     return
             time.sleep(900)
@@ -131,6 +132,13 @@ def monitor_logs():
 
 if __name__ == "__main__":
     print("Log monitor started.")
+    env_not_found = False
+    for env_key in ['INSTANCE_TYPE', 'EIP']:
+        if not env_key in os.environ:
+            print('Environment variable %s is not set' % env_key)
+            env_not_found |= True
+    if env_not_found:
+        sys.exit(1)
     monitor_logs()
     print("Log monitor finished.")
 

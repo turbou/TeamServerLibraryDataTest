@@ -37,10 +37,20 @@ jobs:
         run: |
           INSTANCE_TYPE=$(aws ec2 describe-instances --instance-ids "${{ github.event.inputs.instance_id }}" --query 'Reservations[*].Instances[*].InstanceType' --output text)
           EIP=$(aws ec2 describe-addresses --filters "Name=instance-id,Values=${{ github.event.inputs.instance_id }}" --query 'Addresses[*].PublicIp' --output text)
-          echo "instance_type=$INSTANCE_TYPE" >> "$GITHUB_OUTPUT"
-          echo "eip=$EIP" >> "$GITHUB_OUTPUT"
+          echo "INSTANCE_TYPE=$INSTANCE_TYPE" >> "$GITHUB_OUTPUT"
+          echo "EIP=$EIP" >> "$GITHUB_OUTPUT"
           echo "--------------- Instance Information ---------------"
           echo "EC2 Instance Type: $INSTANCE_TYPE"
           echo "Elastic IP       : $EIP"
           echo "------------------------------------------------"
+
+      - name: Log Monitoring Startup
+        id: log_monitor_start
+        run: |
+          aws ssm send-command \
+            --instance-ids "${{ github.event.inputs.instance_id }}" \
+            --document-name "AWS-RunShellScript" \
+            --parameters "commands=[\"sudo -i bash -c 'cd /root/git/TeamServerLibraryDataTest/log_monitor && INSTANCE_TYPE=${{ steps.get_instance_details.outputs.INSTANCE_TYPE }} EIP=${{ steps.get_instance_details.outputs.EIP }} docker-compose up'\"]" \
+            --output text
+          echo "Successfully sent command to launch Log Monitor on instance: ${{ github.event.inputs.instance_id }}"
 

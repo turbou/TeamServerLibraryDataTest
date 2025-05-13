@@ -6,8 +6,11 @@ services:
       dockerfile: Dockerfile
     environment:
       - TZ=Asia/Tokyo
+      - INSTANCE_ID=${INSTANCE_ID:?err}
       - INSTANCE_TYPE=${INSTANCE_TYPE:?err}
       - EIP=${EIP:?err}
+      - FILE_NAME=${FILE_NAME:?err}
+      - EOP_VERSION=${EOP_VERSION:?err}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./log_monitor.py:/app/log_monitor.py

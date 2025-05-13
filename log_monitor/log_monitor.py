@@ -121,7 +121,12 @@ def monitor_logs():
                     print(f"所要時間: {hours}時間 {minutes}分")
                     message = {
                         "CONTRAST_URL": f"http://{os.environ['EIP']}/Contrast/",
-                        "HOURS": f"所要時間: {hours}時間 {minutes}分 ({os.environ['INSTANCE_TYPE']})"
+                        "HOURS": f"所要時間: {hours}時間 {minutes}分",
+                        "INSTANCE_ID": os.environ['INSTANCE_ID'],
+                        "INSTANCE_TYPE":  os.environ['INSTANCE_TYPE'],
+                        "EIP":  os.environ['EIP'],
+                        "FILE_NAME":  os.environ['FILE_NAME'],
+                        "EOP_VERSION":  os.environ['EOP_VERSION']
                     }
                     post_slack_message(message)
                     return
@@ -133,7 +138,7 @@ def monitor_logs():
 if __name__ == "__main__":
     print("Log monitor started.")
     env_not_found = False
-    for env_key in ['INSTANCE_TYPE', 'EIP']:
+    for env_key in ['INSTANCE_ID', 'INSTANCE_TYPE', 'EIP', 'FILE_NAME', 'EOP_VERSION']:
         if not env_key in os.environ:
             print('Environment variable %s is not set' % env_key)
             env_not_found |= True

@@ -123,8 +123,7 @@ def monitor_logs():
                         "CONTRAST_URL": f"http://{os.environ['EIP']}/Contrast/",
                         "HOURS": f"所要時間: {hours}時間 {minutes}分 ({os.environ['INSTANCE_TYPE']})"
                     }
-                    print(message)
-                    #post_slack_message(message)
+                    post_slack_message(message)
                     return
             time.sleep(900)
 

@@ -36,7 +36,7 @@ jobs:
         id: get_instance_details
         run: |
           INSTANCE_TYPE=$(aws ec2 describe-instances --instance-ids "${{ github.event.inputs.instance_id }}" --query 'Reservations[*].Instances[*].InstanceType' --output text)
-          EIP=$(aws ec2 describe-addresses --filters "Name=instance-id,Values=${{ github.event.inputs.instance_id }} --query 'Addresses[*].PublicIp' --output text)
+          EIP=$(aws ec2 describe-addresses --filters "Name=instance-id,Values=${{ github.event.inputs.instance_id }}" --query 'Addresses[*].PublicIp' --output text)
           echo "instance_type=$INSTANCE_TYPE" >> "$GITHUB_OUTPUT"
           echo "eip=$EIP" >> "$GITHUB_OUTPUT"
           echo "--------------- Instance Information ---------------"

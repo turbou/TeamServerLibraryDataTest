@@ -50,7 +50,7 @@ jobs:
           aws ssm send-command \
             --instance-ids "${{ github.event.inputs.instance_id }}" \
             --document-name "AWS-RunShellScript" \
-            --parameters "commands=[\"sudo -i bash -c 'cd /root/git/TeamServerLibraryDataTest/log_monitor && INSTANCE_TYPE=${{ steps.get_instance_details.outputs.INSTANCE_TYPE }} EIP=${{ steps.get_instance_details.outputs.EIP }} docker-compose up'\"]" \
+            --parameters "commands=[\"sudo -i bash -c 'cd /root/git/TeamServerLibraryDataTest/log_monitor && docker-compose up -e INSTANCE_TYPE=${{ steps.get_instance_details.outputs.INSTANCE_TYPE }} -e EIP=${{ steps.get_instance_details.outputs.EIP }}'\"]" \
             --output text
           echo "Successfully sent command to launch Log Monitor on instance: ${{ github.event.inputs.instance_id }}"
 

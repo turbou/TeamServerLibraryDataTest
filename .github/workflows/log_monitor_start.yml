@@ -1,0 +1,46 @@
+name: Library Data Auto-Validation
+
+on:
+  workflow_dispatch:
+    inputs:
+      instance_id:
+        description: 'EC2 Instance ID'
+        required: true
+        type: string
+        default: 'i-0df6b98aa8d86e49d'
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  lib_data_auto_verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Output Input Parameters
+        run: |
+          echo "--------------- Input Parameters ---------------"
+          echo "EC2 Instance Id: ${{ github.event.inputs.instance_id}}"
+          echo "------------------------------------------------"
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ap-northeast-1
+
+      - name: Get Instance Type and EIP
+        id: get_instance_details
+        run: |
+          INSTANCE_TYPE=$(aws ec2 describe-instances --instance-ids "${{ github.event.inputs.instance_id }}" --query 'Reservations[*].Instances[*].InstanceType' --output text)
+          EIP=$(aws ec2 describe-addresses --filters "InstanceId=${{ github.event.inputs.instance_id }}" --query 'Addresses[*].PublicIp' --output text)
+          echo "instance_type=$INSTANCE_TYPE" >> "$GITHUB_OUTPUT"
+          echo "eip=$EIP" >> "$GITHUB_OUTPUT"
+          echo "--------------- Instance Information ---------------"
+          echo "EC2 Instance Type: $INSTANCE_TYPE"
+          echo "Elastic IP       : $EIP"
+          echo "------------------------------------------------"
+

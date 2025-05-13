@@ -80,7 +80,8 @@ def monitor_logs():
                     }
                     post_slack_message(message)
                     return
-    
+            time.sleep(900)
+
     except docker.errors.APIError as e:
         print(f"Error reading logs from container '{container.name}': {e}")
 

@@ -4,6 +4,10 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    environment:
+      - TZ=Asia/Tokyo
+      - INSTANCE_TYPE=${INSTANCE_TYPE:?err}
+      - EIP=${EIP:?err}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./log_monitor.py:/app/log_monitor.py

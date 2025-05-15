@@ -54,6 +54,7 @@ OICD使ったパイプライン.xlsxに沿って、以下の必要なAWSリソ�
    ```bash
    service docker restart
    systemctl enable docker
+   systemctl is-enabled docker
    ```
 3. vimの初期設定（任意）
    ```bash

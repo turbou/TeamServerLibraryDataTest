@@ -28,6 +28,7 @@ services:
       - '3306'
     volumes:
       - mysql_data:/var/lib/mysql
+      - ./my.cnf:/etc/mysql/conf.d/my.cnf
 
   teamserver:
     image: ghcr.io/contrast-security-inc/contrast:${EOP_VERSION:?err}

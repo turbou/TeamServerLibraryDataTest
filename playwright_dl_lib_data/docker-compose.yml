@@ -1,6 +1,6 @@
 services:
-  playwright:
-    container_name: playwright
+  playwright_dl_lib_data:
+    container_name: playwright_dl_lib_data
     build:
       context: .
       dockerfile: Dockerfile

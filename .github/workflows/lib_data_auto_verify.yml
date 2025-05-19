@@ -106,13 +106,23 @@ jobs:
             sleep 30
           done
 
+      - name: Hub Access Off 
+        id: hub_access_off
+        run: |
+          aws ssm send-command \
+            --instance-ids "${{ github.event.inputs.instance_id }}" \
+            --document-name "AWS-RunShellScript" \
+            --parameters "commands=[\"sudo -i bash -c 'cd /root/git/TeamServerLibraryDataTest/playwright_hub_off && docker-compose -p eop up'\"]" \
+            --output text
+          echo "Successfully sent command to hub access off on instance: ${{ steps.get_instance_id.outputs.INSTANCE_ID }}" 
+
       - name: Create Organization
         id: create_organization
         run: |
           aws ssm send-command \
             --instance-ids "${{ github.event.inputs.instance_id }}" \
             --document-name "AWS-RunShellScript" \
-            --parameters "commands=[\"sudo -i bash -c 'cd /root/git/TeamServerLibraryDataTest/playwright2 && docker-compose -p eop up'\"]" \
+            --parameters "commands=[\"sudo -i bash -c 'cd /root/git/TeamServerLibraryDataTest/playwright_create_org && docker-compose -p eop up'\"]" \
             --output text
           echo "Successfully sent command to create organization on instance: ${{ steps.get_instance_id.outputs.INSTANCE_ID }}"
 
@@ -121,7 +131,7 @@ jobs:
           aws ssm send-command \
             --instance-ids "${{ github.event.inputs.instance_id }}" \
             --document-name "AWS-RunShellScript" \
-            --parameters "commands=[\"sudo sed -i 's#FILE_NAME=.*\$#FILE_NAME=${{ github.event.inputs.lib_filename }}#' /root/git/TeamServerLibraryDataTest/playwright/lib_data.env\"]" \
+            --parameters "commands=[\"sudo sed -i 's#FILE_NAME=.*\$#FILE_NAME=${{ github.event.inputs.lib_filename }}#' /root/git/TeamServerLibraryDataTest/playwright_dl_lib_data/lib_data.env\"]" \
             --output text
           echo "Successfully sent command to update file on instance: ${{ steps.get_instance_id.outputs.INSTANCE_ID }}"
 
@@ -131,7 +141,7 @@ jobs:
           aws ssm send-command \
             --instance-ids "${{ github.event.inputs.instance_id }}" \
             --document-name "AWS-RunShellScript" \
-            --parameters "commands=[\"sudo -i bash -c 'cd /root/git/TeamServerLibraryDataTest/playwright && docker-compose -p playwright up'\"]" \
+            --parameters "commands=[\"sudo -i bash -c 'cd /root/git/TeamServerLibraryDataTest/playwright_dl_lib_data && docker-compose -p playwright up'\"]" \
             --output text
           echo "Successfully sent command to download lib data file on instance: ${{ steps.get_instance_id.outputs.INSTANCE_ID }}"
 
@@ -141,7 +151,7 @@ jobs:
           COMMAND_ID=$(aws ssm send-command \
             --instance-ids "${{ github.event.inputs.instance_id }}" \
             --document-name "AWS-RunShellScript" \
-            --parameters "commands=[\"sudo -i bash -c 'cd /root/git/TeamServerLibraryDataTest/playwright && ./md5sum_check.sh'\"]" \
+            --parameters "commands=[\"sudo -i bash -c 'cd /root/git/TeamServerLibraryDataTest/playwright_dl_lib_data && ./md5sum_check.sh'\"]" \
             --output json | jq -r '.Command.CommandId')
           echo "COMMAND_ID=$COMMAND_ID" >> $GITHUB_OUTPUT
           echo "Successfully sent command to confirm Library Downloaded on instance: ${{ github.event.inputs.instance_id }}"

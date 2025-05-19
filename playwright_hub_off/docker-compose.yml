@@ -1,6 +1,6 @@
 services:
-  playwright2:
-    container_name: playwright2
+  playwright_hub_off:
+    container_name: playwright_hub_off
     build:
       context: .
       dockerfile: Dockerfile
@@ -10,5 +10,5 @@ services:
     environment:
       TZ: Asia/Tokyo
     working_dir: /app
-    command: python create_org.py
+    command: python hub_off.py
 

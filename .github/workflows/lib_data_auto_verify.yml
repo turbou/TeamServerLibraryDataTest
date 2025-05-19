@@ -35,6 +35,7 @@ jobs:
           echo "--------------- Input Parameters ---------------"
           echo "EC2 Instance Id: ${{ github.event.inputs.instance_id}}"
           echo "EOP Version    : ${{ github.event.inputs.eop_version }}"
+          echo "MySQL Version  : ${{ github.event.inputs.mysql_version }}"
           echo "Lib FileName   : ${{ github.event.inputs.lib_filename }}"
           echo "------------------------------------------------"
 

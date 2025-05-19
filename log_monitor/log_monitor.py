@@ -126,7 +126,8 @@ def monitor_logs():
                         "INSTANCE_TYPE":  os.environ['INSTANCE_TYPE'],
                         "EIP":  os.environ['EIP'],
                         "FILE_NAME":  os.environ['FILE_NAME'],
-                        "EOP_VERSION":  os.environ['EOP_VERSION']
+                        "EOP_VERSION":  os.environ['EOP_VERSION'],
+                        "MYSQL_VERSION":  os.environ['MYSQL_VERSION']
                     }
                     post_slack_message(message)
                     return
@@ -138,7 +139,7 @@ def monitor_logs():
 if __name__ == "__main__":
     print("Log monitor started.")
     env_not_found = False
-    for env_key in ['INSTANCE_ID', 'INSTANCE_TYPE', 'EIP', 'FILE_NAME', 'EOP_VERSION']:
+    for env_key in ['INSTANCE_ID', 'INSTANCE_TYPE', 'EIP', 'FILE_NAME', 'EOP_VERSION', 'MYSQL_VERSION']:
         if not env_key in os.environ:
             print('Environment variable %s is not set' % env_key)
             env_not_found |= True

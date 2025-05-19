@@ -13,7 +13,7 @@ services:
       - maildir:/tmp
 
   mysql:
-    image: mysql:8.0.32
+    image: mysql:${MYSQL_VERSION:?err}
     container_name: contrast.mysql
     command: --local-infile=1 --log-bin-trust-function-creators=ON --innodb-buffer-pool-size=4G
     cap_add:

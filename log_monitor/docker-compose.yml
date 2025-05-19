@@ -11,6 +11,7 @@ services:
       - EIP=${EIP:?err}
       - FILE_NAME=${FILE_NAME:?err}
       - EOP_VERSION=${EOP_VERSION:?err}
+      - MYSQL_VERSION=${MYSQL_VERSION:?err}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./log_monitor.py:/app/log_monitor.py

@@ -88,5 +88,13 @@ OICD使ったパイプライン.xlsxに沿って、以下の必要なAWSリソ�
    export HUB_USERNAME=xxxx.yyyyyy@contrastsecurity.com
    export HUB_PASSWORD=XXXXXXXXXXXXXXXXXX
    ```
+6. Hubへのアクセスのdisable対応（その１）
+   ```bash
+   vim /etc/hosts
+   ```
+   ```
+   # 以下を追加
+   127.0.0.1   ardy.contrastsecurity.com
+   ```
 
 以上

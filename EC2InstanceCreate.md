@@ -96,5 +96,6 @@ OICD使ったパイプライン.xlsxに沿って、以下の必要なAWSリソ�
    # 以下を追加
    127.0.0.1   ardy.contrastsecurity.com
    ```
+   その２に関しては、TeamServerの設定画面にあるので、パイプラインで実施されます。
 
 以上

@@ -68,7 +68,7 @@ jobs:
           aws ssm send-command \
             --instance-ids "${{ github.event.inputs.instance_id }}" \
             --document-name "AWS-RunShellScript" \
-            --parameters "commands=[\"sudo sed -i 's#EOP_VERSION=.*\$#EOP_VERSION=${{ github.event.inputs.eop_version }}#' -e 's#MYSQL_VERSION=.*\$#MYSQL_VERSION=${{ github.event.inputs.mysql_version }}#' /root/git/TeamServerLibraryDataTest/eop/.env\"]" \
+            --parameters "commands=[\"sudo sed -i -e 's#EOP_VERSION=.*\$#EOP_VERSION=${{ github.event.inputs.eop_version }}#' -e 's#MYSQL_VERSION=.*\$#MYSQL_VERSION=${{ github.event.inputs.mysql_version }}#' /root/git/TeamServerLibraryDataTest/eop/.env\"]" \
             --output text
           echo "Successfully sent command to update file on instance: ${{ steps.get_instance_id.outputs.INSTANCE_ID }}"
 

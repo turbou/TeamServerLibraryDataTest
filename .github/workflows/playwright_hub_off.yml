@@ -14,7 +14,7 @@ permissions:
   contents: read
 
 jobs:
-  create_organization:
+  hub_access_off:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository

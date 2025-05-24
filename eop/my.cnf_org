@@ -2,7 +2,7 @@
 # To customize mysql configuration parameters please use the data/conf/my_extra.cnf file.
 
 [client]
-port                                    = 3306
+port                                    = 13306
 user                                    = mysql
 
 [mysqld_safe]
@@ -13,7 +13,7 @@ nice                                    = 0
 user                                    = root
 #pid-file                               = /tmp/contrast.pid
 #socket                                 = /tmp/contrast.sock
-port                                    = 3306
+port                                    = 13306
 tmpdir                                  = /tmp
 log-error                               = /tmp/mysql_error.log
 

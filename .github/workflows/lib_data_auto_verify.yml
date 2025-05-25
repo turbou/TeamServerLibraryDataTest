@@ -167,7 +167,7 @@ jobs:
           COMMAND_ID=$(aws ssm send-command \
             --instance-ids "${{ github.event.inputs.instance_id }}" \
             --document-name "AWS-RunShellScript" \
-            --parameters "commands=[\"sudo -i bash -c 'cd /root/git/TeamServerLibraryDataTest/playwright_dl_lib_data && ./md5sum_check.sh'\"]" \
+            --parameters "commands=[\"sudo -i bash -c 'cd /root/git/TeamServerLibraryDataTest/playwright_dl_lib_data && ./md5sum_check.sh ${{ github.event.inputs.lib_filename }}'\"]" \
             --output json | jq -r '.Command.CommandId')
           echo "COMMAND_ID=$COMMAND_ID" >> $GITHUB_OUTPUT
           echo "Successfully sent command to confirm Library Downloaded on instance: ${{ github.event.inputs.instance_id }}"

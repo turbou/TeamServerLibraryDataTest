@@ -1,5 +1,6 @@
 services:
   playwright_dl_lib_data:
+    image: playwright:latest
     container_name: playwright_dl_lib_data
     build:
       context: .

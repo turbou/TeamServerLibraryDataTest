@@ -1,5 +1,6 @@
 services:
   playwright_hub_off:
+    image: playwright:latest
     container_name: playwright_hub_off
     build:
       context: .

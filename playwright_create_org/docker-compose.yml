@@ -1,5 +1,6 @@
 services:
   playwright_create_org:
+    image: playwright:latest
     container_name: playwright_create_org
     build:
       context: .

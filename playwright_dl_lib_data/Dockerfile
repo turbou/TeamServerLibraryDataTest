@@ -16,5 +16,4 @@ RUN apt-get update && apt-get install -y \
 RUN playwright install chromium
 RUN playwright install-deps
 COPY . .
-CMD ["python", "download_library_data.py"]
 

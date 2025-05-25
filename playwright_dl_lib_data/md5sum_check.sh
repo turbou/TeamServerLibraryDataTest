@@ -10,9 +10,9 @@ CHECK_INTERVAL=60
 TIMEOUT=180
 
 START_TIME=`date +%s`
+MD5SUM_FILE="${DIRECTORY}/${FILE_NAME}-md5.txt"
 while true; do
   TIMESTAMP=$(date "+%Y-%m-%d %H:%M:%S")
-  MD5SUM_FILE="${DIRECTORY}/${FILE_NAME}-md5.txt"
   if [ -z "$MD5SUM_FILE" ]; then
     echo "エラー: MD5SUMファイルが存在しません。"
   else
@@ -33,7 +33,7 @@ ZIP_FILE="${DIRECTORY}/${FILE_NAME}"
 
 EXPECTED_MD5SUM=`cat "$MD5SUM_FILE"`
 if [ -z "$EXPECTED_MD5SUM" ]; then
-  echo "エラー: MD5SUMファイル '$DIRECTORY/$MD5SUM_FILE' が空です。"
+  echo "エラー: MD5SUMファイル '$MD5SUM_FILE' が空です。"
   exit 1
 fi
 

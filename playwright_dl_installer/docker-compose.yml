@@ -1,0 +1,19 @@
+services:
+  playwright_dl_installer:
+    image: playwright:latest
+    container_name: playwright_dl_installer
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/app
+      - /opt/contrast/work:/work
+    environment:
+      TZ: Asia/Tokyo
+      CONTRAST_HUB_USERNAME: ${HUB_USERNAME:?err}
+      CONTRAST_HUB_PASSWORD: ${HUB_PASSWORD:?err}
+    env_file:
+      - installer.env
+    working_dir: /app
+    command: python download_installer.py
+

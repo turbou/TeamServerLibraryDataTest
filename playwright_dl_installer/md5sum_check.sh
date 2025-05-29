@@ -1,13 +1,18 @@
 #!/bin/sh
 
+if [ $# -ne 1 ]; then
+  echo "引数でFILE_NAMEが渡されていません。"
+  exit 1
+fi
+FILE_NAME=$1
 DIRECTORY="/opt/contrast/work"
 CHECK_INTERVAL=60
 TIMEOUT=180
 
 START_TIME=`date +%s`
+MD5SUM_FILE="${DIRECTORY}/${FILE_NAME}-md5.txt"
 while true; do
   TIMESTAMP=$(date "+%Y-%m-%d %H:%M:%S")
-  MD5SUM_FILE=`find $DIRECTORY -maxdepth 1 -name "*.zip-md5.txt"`
   if [ -z "$MD5SUM_FILE" ]; then
     echo "エラー: MD5SUMファイルが存在しません。"
   else
@@ -24,12 +29,11 @@ while true; do
   sleep "$CHECK_INTERVAL"
 done
 
-base_name=`basename $MD5SUM_FILE .zip-md5.txt`
-ZIP_FILE="${DIRECTORY}/${base_name}.zip"
+ZIP_FILE="${DIRECTORY}/${FILE_NAME}"
 
 EXPECTED_MD5SUM=`cat "$MD5SUM_FILE"`
 if [ -z "$EXPECTED_MD5SUM" ]; then
-  echo "エラー: MD5SUMファイル '$DIRECTORY/$MD5SUM_FILE' が空です。"
+  echo "エラー: MD5SUMファイル '$MD5SUM_FILE' が空です。"
   exit 1
 fi
 

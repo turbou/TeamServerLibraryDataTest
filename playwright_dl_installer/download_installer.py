@@ -14,7 +14,7 @@ def run(playwright: Playwright) -> None:
     if env_not_found:
         sys.exit(1)
 
-    browser = playwright.chromium.launch(headless=False)
+    browser = playwright.chromium.launch(headless=True)
     context = browser.new_context()
     page = context.new_page()
     page.goto("https://hub.contrastsecurity.com/h/index.html")

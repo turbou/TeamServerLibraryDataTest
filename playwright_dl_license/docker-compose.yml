@@ -1,0 +1,19 @@
+services:
+  playwright_dl_license:
+    image: playwright:latest
+    container_name: playwright_dl_license
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/app
+      - /opt/contrast/work:/work
+    environment:
+      TZ: Asia/Tokyo
+      CONTRAST_HUB_USERNAME: ${HUB_USERNAME:?err}
+      CONTRAST_HUB_PASSWORD: ${HUB_PASSWORD:?err}
+    env_file:
+      - license.env
+    working_dir: /app
+    command: python download_license.py
+

@@ -1,0 +1,42 @@
+version: '3'
+
+services:
+  mail:
+    image: mailhog/mailhog:v1.0.1
+    container_name: contrast.mail
+    environment:
+      - TZ=Asia/Tokyo
+      - MH_UI_WEB_PATH=mail
+      - MH_STORAGE=maildir
+      - MH_MAILDIR_PATH=/tmp
+    volumes:
+      - maildir:/tmp
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:5.2.2
+    container_name: contrast.phpmyadmin
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      PMA_ARBITRARY: 0
+      MYSQL_ROOT_PASSWORD: default1!
+      MYSQL_DATABASE: contrast
+      MYSQL_USER: contrast
+      MYSQL_PASSWORD: password
+
+  nginx:
+    image: nginx:1.13
+    container_name: contrast.nginx
+    ports:
+      - 80:80
+    environment:
+      - TZ=Asia/Tokyo
+    volumes:
+      - ./nginx_conf:/etc/nginx/conf.d
+    depends_on:
+      - mail
+      - phpmyadmin
+
+volumes:
+  maildir: {}
+

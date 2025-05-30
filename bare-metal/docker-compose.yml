@@ -9,6 +9,8 @@ services:
       - MH_UI_WEB_PATH=mail
       - MH_STORAGE=maildir
       - MH_MAILDIR_PATH=/tmp
+    ports:
+      - 1025:1025
     volumes:
       - maildir:/tmp
 
@@ -16,13 +18,12 @@ services:
     image: phpmyadmin/phpmyadmin:5.2.2
     container_name: contrast.phpmyadmin
     environment:
-      PMA_HOST: mysql
-      PMA_PORT: 3306
+      PMA_HOST: ${PRIVATE_IP:?err}
+      PMA_PORT: 13306
       PMA_ARBITRARY: 0
-      MYSQL_ROOT_PASSWORD: default1!
-      MYSQL_DATABASE: contrast
-      MYSQL_USER: contrast
-      MYSQL_PASSWORD: password
+      #MYSQL_DATABASE: contrast
+      PMA_USER: contrast
+      PMA_PASSWORD: ${MYSQL_PASSWORD:?err}
 
   nginx:
     image: nginx:1.13

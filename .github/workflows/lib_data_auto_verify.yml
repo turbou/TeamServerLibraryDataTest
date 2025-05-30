@@ -1,4 +1,4 @@
-name: Library Data Auto-Validation
+name: Library Data Auto-Validation on Docker
 
 on:
   workflow_dispatch:
@@ -48,7 +48,7 @@ jobs:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: ap-northeast-1
 
-      - name: Get Instance Type and EIP
+      - name: Get Instance Type and Elastic IP
         id: get_instance_details
         run: |
           INSTANCE_TYPE=$(aws ec2 describe-instances --instance-ids "${{ github.event.inputs.instance_id }}" --query 'Reservations[*].Instances[*].InstanceType' --output text)

@@ -56,7 +56,7 @@ jobs:
           aws ssm send-command \
             --instance-ids "${{ github.event.inputs.instance_id }}" \
             --document-name "AWS-RunShellScript" \
-            --parameters "commands=[\"sudo sed -i -e 's#INSTANCE_ID=.*\$#INSTANCE_ID=${{ github.event.inputs.instance_id }}#' -e 's#INSTANCE_TYPE=.*\$#INSTANCE_TYPE=$INSTANCE_TYPE#' -e 's#EIP=.*\$#EIP=$EIP#' -e 's#FILE_NAME=.*\$#FILE_NAME=${{ github.event.inputs.lib_filename }}#' -e 's#EOP_VERSION=.*\$#EOP_VERSION=${{ github.event.inputs.eop_version }}#' -e 's#MYSQL_VERSION=.*\$#MYSQL_VERSION=${{ github.event.inputs.mysql_version }}#' /root/git/TeamServerLibraryDataTest/log_monitor_bare/.env\"]" \
+            --parameters "commands=[\"sudo sed -i -e 's#INSTANCE_ID=.*\$#INSTANCE_ID=${{ github.event.inputs.instance_id }}#' -e 's#INSTANCE_TYPE=.*\$#INSTANCE_TYPE=$INSTANCE_TYPE#' -e 's#EIP=.*\$#EIP=$EIP#' -e 's#PIP=.*\$#PIP=$PIP#' -e 's#SH_FILE_NAME=.*\$#SH_FILE_NAME=${{ github.event.inputs.sh_filename }}#' -e 's#LIC_FILE_NAME=.*\$#LIC_FILE_NAME=${{ github.event.inputs.lic_filename }}#' /root/git/TeamServerLibraryDataTest/log_monitor_bare/.env\"]" \
             --output text
           echo "PIP=$PIP" >> $GITHUB_OUTPUT
           echo "EIP=$EIP" >> $GITHUB_OUTPUT

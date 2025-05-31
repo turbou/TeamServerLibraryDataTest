@@ -14,10 +14,10 @@ MD5SUM_FILE="${DIRECTORY}/${FILE_NAME}-md5.txt"
 while true; do
   TIMESTAMP=$(date "+%Y-%m-%d %H:%M:%S")
   if [ -f "$MD5SUM_FILE" ] && [ -s "$MD5SUM_FILE" ]; then
-    echo "エラー: MD5SUMファイルが存在しない、またはファイルサイズが０です。"
-  else
     echo "MD5SUMファイル '$MD5SUM_FILE' が見つかりました。"
     break
+  else
+    echo "エラー: MD5SUMファイルが存在しない、またはファイルサイズが０です。"
   fi
   CURRENT_TIME=`date +%s`
   ELAPSED_TIME=`expr "$CURRENT_TIME" - "$START_TIME"`

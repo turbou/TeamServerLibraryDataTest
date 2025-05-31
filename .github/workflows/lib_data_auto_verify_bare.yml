@@ -120,25 +120,16 @@ jobs:
             sleep 30
           done
 
-#      - name: Reconfigure EOP Version
-#        run: |
-#          aws ssm send-command \
-#            --instance-ids "${{ github.event.inputs.instance_id }}" \
-#            --document-name "AWS-RunShellScript" \
-#            --parameters "commands=[\"sudo sed -i -e 's#EOP_VERSION=.*\$#EOP_VERSION=${{ github.event.inputs.eop_version }}#' -e 's#MYSQL_VERSION=.*\$#MYSQL_VERSION=${{ github.event.inputs.mysql_version }}#' /root/git/TeamServerLibraryDataTest/eop/.env\"]" \
-#            --output text
-#          echo "Successfully sent command to update file on instance: ${{ github.event.inputs.instance_id }}"
-#
-#      - name: TeamServer Container Startup
-#        id: teamserver_up
-#        run: |
-#          aws ssm send-command \
-#            --instance-ids "${{ github.event.inputs.instance_id }}" \
-#            --document-name "AWS-RunShellScript" \
-#            --parameters "commands=[\"sudo -i bash -c 'cd /root/git/TeamServerLibraryDataTest/eop && docker-compose -p eop up'\"]" \
-#            --output text
-#          echo "Successfully sent command to launch TeamServer on instance: ${{ github.event.inputs.instance_id }}"
-#
+      - name: Install Contrast
+        id: install_contrast
+        run: |
+          aws ssm send-command \
+            --instance-ids "${{ github.event.inputs.instance_id }}" \
+            --document-name "AWS-RunShellScript" \
+            --parameters "commands=[\"sudo -i bash -c 'cd /opt/contrast/work && chmod a+x ${{ github.event.inputs.sh_filename }} && ./${{ github.event.inputs.sh_filename }} -varfile /root/git/TeamServerLibraryDataTest/bare-metal/response.varfile -overwrite -q'\"]" \
+            --output text
+          echo "Successfully sent command to Install Contrast on instance: ${{ github.event.inputs.instance_id }}"
+
 #      - name: TeamServer Running Status Check
 #        id: check_for_startup
 #        run: |

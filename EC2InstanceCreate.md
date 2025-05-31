@@ -37,7 +37,11 @@ OICD使ったパイプライン.xlsxに沿って、以下の必要なAWSリソ�
    ```bash
    hostnamectl set-hostname teamserver4ldc
    ```
-2. dockerのインストール
+2. タイムゾーンの設定
+   ```bash
+   timedatectl set-timezone Asia/Tokyo
+   ```
+3. dockerのインストール
    ```bash
    # インストール可能なバージョンを確認する場合
    dnf search --showduplicates docker
@@ -56,7 +60,7 @@ OICD使ったパイプライン.xlsxに沿って、以下の必要なAWSリソ�
    systemctl enable docker
    systemctl is-enabled docker
    ```
-3. vimの初期設定（任意）
+4. vimの初期設定（任意）
    ```bash
    vim ~/.vimrc
    ```
@@ -71,7 +75,7 @@ OICD使ったパイプライン.xlsxに沿って、以下の必要なAWSリソ�
    set noswapfile
    syntax on
    ```
-4. 本Githubリポジトリのgit clone
+5. 本Githubリポジトリのgit clone
    ```bash
    dnf install -y git
    ```
@@ -79,7 +83,7 @@ OICD使ったパイプライン.xlsxに沿って、以下の必要なAWSリソ�
    mkdir git && cd git
    git clone https://github.com/turbou/TeamServerLibraryDataTest.git
    ```
-5. Contrast Hubの認証情報の環境変数を`.bash_profile`に設定
+6. Contrast Hubの認証情報の環境変数を`.bash_profile`に設定
    ```bash
    vim ~/.bash_profile
    ```
@@ -88,7 +92,7 @@ OICD使ったパイプライン.xlsxに沿って、以下の必要なAWSリソ�
    export HUB_USERNAME=xxxx.yyyyyy@contrastsecurity.com
    export HUB_PASSWORD=XXXXXXXXXXXXXXXXXX
    ```
-6. Hubへのアクセスのdisable対応（その１）
+7. Hubへのアクセスのdisable対応（その１）
    ```bash
    vim /etc/hosts
    ```

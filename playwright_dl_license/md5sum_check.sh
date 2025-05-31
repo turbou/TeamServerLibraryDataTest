@@ -13,8 +13,8 @@ START_TIME=`date +%s`
 MD5SUM_FILE="${DIRECTORY}/${FILE_NAME}-md5.txt"
 while true; do
   TIMESTAMP=$(date "+%Y-%m-%d %H:%M:%S")
-  if [ -z "$MD5SUM_FILE" ]; then
-    echo "エラー: MD5SUMファイルが存在しません。"
+  if [ -f "$MD5SUM_FILE" ] && [ -s "$MD5SUM_FILE" ]; then
+    echo "エラー: MD5SUMファイルが存在しない、またはファイルサイズが０です。"
   else
     echo "MD5SUMファイル '$MD5SUM_FILE' が見つかりました。"
     break

@@ -128,7 +128,7 @@ jobs:
           aws ssm send-command \
             --instance-ids "${{ github.event.inputs.instance_id }}" \
             --document-name "AWS-RunShellScript" \
-            --parameters "commands=[\"sudo -i bash -c 'cd /root/git/TeamServerLibraryDataTest/playwright_hub_off && docker-compose -p eop up'\"]" \
+            --parameters "commands=[\"sudo -i bash -c 'cd /root/git/TeamServerLibraryDataTest/playwright_hub_off && docker-compose -p eop run --rm playwright_hub_off'\"]" \
             --output text
           echo "Successfully sent command to hub access off on instance: ${{ github.event.inputs.instance_id }}" 
 
@@ -138,7 +138,7 @@ jobs:
           aws ssm send-command \
             --instance-ids "${{ github.event.inputs.instance_id }}" \
             --document-name "AWS-RunShellScript" \
-            --parameters "commands=[\"sudo -i bash -c 'cd /root/git/TeamServerLibraryDataTest/playwright_create_org && docker-compose -p eop up'\"]" \
+            --parameters "commands=[\"sudo -i bash -c 'cd /root/git/TeamServerLibraryDataTest/playwright_create_org && docker-compose -p eop run --rm playwright_create_org'\"]" \
             --output text
           echo "Successfully sent command to create organization on instance: ${{ github.event.inputs.instance_id }}"
 
@@ -157,7 +157,7 @@ jobs:
           aws ssm send-command \
             --instance-ids "${{ github.event.inputs.instance_id }}" \
             --document-name "AWS-RunShellScript" \
-            --parameters "commands=[\"sudo -i bash -c 'cd /root/git/TeamServerLibraryDataTest/playwright_dl_lib_data && docker-compose -p playwright up'\"]" \
+            --parameters "commands=[\"sudo -i bash -c 'cd /root/git/TeamServerLibraryDataTest/playwright_dl_lib_data && docker-compose run --rm playwright_dl_lib_data'\"]" \
             --output text
           echo "Successfully sent command to download lib data file on instance: ${{ github.event.inputs.instance_id }}"
 
@@ -185,11 +185,6 @@ jobs:
             echo "Current Status: $STATUS"
             if [[ "$STATUS" == "Success" || "$STATUS" == "Failed" || "$STATUS" == "Cancelled" || "$STATUS" == "TimedOut" ]]; then
               echo "Command execution finished with status: $STATUS"
-              aws ssm send-command \
-                --instance-ids "${{ github.event.inputs.instance_id }}" \
-                --document-name "AWS-RunShellScript" \
-                --parameters "commands=[\"sudo -i bash -c 'docker-compose -p playwright down --volumes'\"]" \
-                --output text
               break
             fi
             sleep 30
@@ -248,7 +243,7 @@ jobs:
           aws ssm send-command \
             --instance-ids "${{ github.event.inputs.instance_id }}" \
             --document-name "AWS-RunShellScript" \
-            --parameters "commands=[\"sudo -i bash -c 'cd /root/git/TeamServerLibraryDataTest/log_monitor && docker-compose up'\"]" \
+            --parameters "commands=[\"sudo -i bash -c 'cd /root/git/TeamServerLibraryDataTest/log_monitor && docker-compose run --rm log_monitor'\"]" \
             --output text
           echo "Successfully sent command to Start Log Monitor on instance: ${{ github.event.inputs.instance_id }}"
 

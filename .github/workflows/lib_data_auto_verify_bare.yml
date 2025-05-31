@@ -120,15 +120,54 @@ jobs:
             sleep 30
           done
 
-      - name: Install Contrast
-        id: install_contrast
+      - name: Download License File via Playwright Container
+        id: license_download
         run: |
           aws ssm send-command \
             --instance-ids "${{ github.event.inputs.instance_id }}" \
             --document-name "AWS-RunShellScript" \
-            --parameters "commands=[\"sudo -i bash -c 'cd /opt/contrast/work && chmod a+x ${{ github.event.inputs.sh_filename }} && ./${{ github.event.inputs.sh_filename }} -varfile /root/git/TeamServerLibraryDataTest/bare-metal/response.varfile -overwrite -q'\"]" \
+            --parameters "commands=[\"sudo -i bash -c 'cd /root/git/TeamServerLibraryDataTest/playwright_dl_license && docker-compose run --rm playwright_dl_license'\"]" \
             --output text
-          echo "Successfully sent command to Install Contrast on instance: ${{ github.event.inputs.instance_id }}"
+          echo "Successfully sent command to download license file on instance: ${{ github.event.inputs.instance_id }}"
+
+      - name: License File Download Completion Check
+        id: check_for_license_download
+        run: |
+          COMMAND_ID=$(aws ssm send-command \
+            --instance-ids "${{ github.event.inputs.instance_id }}" \
+            --document-name "AWS-RunShellScript" \
+            --parameters "commands=[\"sudo -i bash -c 'cd /root/git/TeamServerLibraryDataTest/playwright_dl_license && ./md5sum_check.sh ${{ github.event.inputs.lic_filename }}'\"]" \
+            --output json | jq -r '.Command.CommandId')
+          echo "COMMAND_ID=$COMMAND_ID" >> $GITHUB_OUTPUT
+          echo "Successfully sent command to confirm License File Downloaded on instance: ${{ github.event.inputs.instance_id }}"
+
+      - name: Wait for License File Download Completion Check
+        id: wait_command_for_download_license
+        run: |
+          COMMAND_ID="${{ steps.check_for_license_download.outputs.COMMAND_ID }}"
+          echo "Waiting for command ID: $COMMAND_ID to complete..."
+          while true; do
+            STATUS=$(aws ssm get-command-invocation \
+              --command-id "$COMMAND_ID" \
+              --instance-id "${{ github.event.inputs.instance_id }}" \
+              --output json | jq -r '.Status')
+            echo "Current Status: $STATUS"
+            if [[ "$STATUS" == "Success" || "$STATUS" == "Failed" || "$STATUS" == "Cancelled" || "$STATUS" == "TimedOut" ]]; then
+              echo "Command execution finished with status: $STATUS"
+              break
+            fi
+            sleep 30
+          done
+
+#      - name: Install Contrast
+#        id: install_contrast
+#        run: |
+#          aws ssm send-command \
+#            --instance-ids "${{ github.event.inputs.instance_id }}" \
+#            --document-name "AWS-RunShellScript" \
+#            --parameters "commands=[\"sudo -i bash -c 'cd /opt/contrast/work && chmod a+x ${{ github.event.inputs.sh_filename }} && ./${{ github.event.inputs.sh_filename }} -varfile /root/git/TeamServerLibraryDataTest/bare-metal/response.varfile -overwrite -q'\"]" \
+#            --output text
+#          echo "Successfully sent command to Install Contrast on instance: ${{ github.event.inputs.instance_id }}"
 
 #      - name: TeamServer Running Status Check
 #        id: check_for_startup

@@ -62,6 +62,36 @@ jobs:
           echo "EIP=$EIP" >> $GITHUB_OUTPUT
           echo "Successfully sent command to update file on instance: ${{ github.event.inputs.instance_id }}"
 
+      - name: Reconfigure Installer Filename
+        run: |
+          aws ssm send-command \
+            --instance-ids "${{ github.event.inputs.instance_id }}" \
+            --document-name "AWS-RunShellScript" \
+            --parameters "commands=[\"sudo sed -i 's#FILE_NAME=.*\$#FILE_NAME=${{ github.event.inputs.sh_filename }}#' /root/git/TeamServerLibraryDataTest/playwright_dl_installer/installer.env\"]" \
+            --output text
+          echo "Successfully sent command to update file on instance: ${{ github.event.inputs.instance_id }}"
+
+      - name: Download Installer via Playwright Container
+        id: installer_download
+        run: |
+          aws ssm send-command \
+            --instance-ids "${{ github.event.inputs.instance_id }}" \
+            --document-name "AWS-RunShellScript" \
+            --parameters "commands=[\"sudo -i bash -c 'cd /root/git/TeamServerLibraryDataTest/playwright_dl_installer && docker-compose -p playwright up'\"]" \
+            --output text
+          echo "Successfully sent command to download installer file on instance: ${{ github.event.inputs.instance_id }}"
+
+      - name: Installer Download Completion Check
+        id: check_for_installer_download
+        run: |
+          COMMAND_ID=$(aws ssm send-command \
+            --instance-ids "${{ github.event.inputs.instance_id }}" \
+            --document-name "AWS-RunShellScript" \
+            --parameters "commands=[\"sudo -i bash -c 'cd /root/git/TeamServerLibraryDataTest/playwright_dl_installer && ./md5sum_check.sh ${{ github.event.inputs.sh_filename }}'\"]" \
+            --output json | jq -r '.Command.CommandId')
+          echo "COMMAND_ID=$COMMAND_ID" >> $GITHUB_OUTPUT
+          echo "Successfully sent command to confirm Installer Downloaded on instance: ${{ github.event.inputs.instance_id }}"
+
 #      - name: Reconfigure EOP Version
 #        run: |
 #          aws ssm send-command \

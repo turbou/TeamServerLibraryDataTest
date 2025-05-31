@@ -1,6 +1,6 @@
 services:
-  log_monitor:
-    container_name: log_monitor
+  folder_monitor:
+    container_name: folder_monitor
     build:
       context: .
       dockerfile: Dockerfile

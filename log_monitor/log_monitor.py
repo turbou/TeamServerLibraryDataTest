@@ -100,6 +100,18 @@ def monitor_logs():
 
                 match5 = re.search(pattern5, line)
                 if match5:
+                    chk_command = "ls -1 /opt/contrast/data/libraries"
+                    exit_code, output = container.exec_run(cmd=chk_command)
+                    lib_dir_chk_msg = "librariesディレクトリ内も空になっています。"
+                    if exit_code == 0:
+                        file_list = output.decode('utf-8').strip().split('\n')
+                        file_list = [f for f in file_list if f and f not in ('.', '..')]
+                        if len(file_list) > 0:
+                            lib_dir_chk_msg = f"librariesディレクトリ内が空ではありません。{file_list}"
+                    else:
+                        print(f"エラー: コンテナ内でコマンドの実行に失敗しました。終了コード: {exit_code}")
+                        print(f"エラー出力:\n{output.decode('utf-8')}")
+                        lib_dir_chk_msg = "librariesディレクトリ内の確認ができませんでした。"
                     date_str = match5.group(1)
                     time_str = match5.group(2)
                     day = int(date_str[0:2])
@@ -122,6 +134,7 @@ def monitor_logs():
                     message = {
                         "CONTRAST_URL": f"http://{os.environ['EIP']}/Contrast/",
                         "HOURS": f"所要時間: {hours}時間 {minutes}分",
+                        "LIB_DIR_CHK": lib_dir_chk_msg,
                         "INSTANCE_ID": os.environ['INSTANCE_ID'],
                         "INSTANCE_TYPE":  os.environ['INSTANCE_TYPE'],
                         "EIP":  os.environ['EIP'],

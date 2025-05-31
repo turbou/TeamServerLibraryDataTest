@@ -159,6 +159,18 @@ jobs:
             sleep 30
           done
 
+      - name: Reconfigure response.varfile
+        run: |
+          PIP="${{ steps.get_instance_details.outputs.PIP }}"
+          aws ssm send-command \
+            --instance-ids "${{ github.event.inputs.instance_id }}" \
+            --document-name "AWS-RunShellScript" \
+            --parameters "commands=[\"sudo sed -i -e 's#licenseFileLocation=.*\$#licenseFileLocation=/opt/contrast/work/${{ github.event.inputs.lic_filename }}#' -e 's#teamserver_url=.*\$#teamserver_url=http\://$PIP/Contrast#' /root/git/TeamServerLibraryDataTest/bare-metal/response.varfile\"]" \
+            --output text
+          echo "PIP=$PIP" >> $GITHUB_OUTPUT
+          echo "EIP=$EIP" >> $GITHUB_OUTPUT
+          echo "Successfully sent command to update file on instance: ${{ github.event.inputs.instance_id }}"
+
 #      - name: Install Contrast
 #        id: install_contrast
 #        run: |

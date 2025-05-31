@@ -227,23 +227,23 @@ jobs:
             sleep 30
           done
 
-#      - name: Restart TeamServer Container
-#        id: teamserver_restart
-#        run: |
-#          aws ssm send-command \
-#            --instance-ids "${{ github.event.inputs.instance_id }}" \
-#            --document-name "AWS-RunShellScript" \
-#            --parameters "commands=[\"sudo -i bash -c 'docker-compose -p eop restart teamserver'\"]" \
-#            --output text
-#          echo "Successfully sent command to Restart TeamServer on instance: ${{ github.event.inputs.instance_id }}"
-#
-#      - name: Log Monitor Startup
-#        id: log_monitor_start
-#        run: |
-#          aws ssm send-command \
-#            --instance-ids "${{ github.event.inputs.instance_id }}" \
-#            --document-name "AWS-RunShellScript" \
-#            --parameters "commands=[\"sudo -i bash -c 'cd /root/git/TeamServerLibraryDataTest/log_monitor && docker-compose run --rm log_monitor'\"]" \
-#            --output text
-#          echo "Successfully sent command to Start Log Monitor on instance: ${{ github.event.inputs.instance_id }}"
+      - name: Restart TeamServer Container
+        id: teamserver_restart
+        run: |
+          aws ssm send-command \
+            --instance-ids "${{ github.event.inputs.instance_id }}" \
+            --document-name "AWS-RunShellScript" \
+            --parameters "commands=[\"sudo -i bash -c 'docker-compose -p eop restart teamserver'\"]" \
+            --output text
+          echo "Successfully sent command to Restart TeamServer on instance: ${{ github.event.inputs.instance_id }}"
+
+      - name: Log Monitor Startup
+        id: log_monitor_start
+        run: |
+          aws ssm send-command \
+            --instance-ids "${{ github.event.inputs.instance_id }}" \
+            --document-name "AWS-RunShellScript" \
+            --parameters "commands=[\"sudo -i bash -c 'cd /root/git/TeamServerLibraryDataTest/log_monitor && docker-compose run --rm log_monitor'\"]" \
+            --output text
+          echo "Successfully sent command to Start Log Monitor on instance: ${{ github.event.inputs.instance_id }}"
 

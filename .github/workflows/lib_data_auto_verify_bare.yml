@@ -16,6 +16,11 @@ on:
         description: 'License FileName e.g., contrast-12-31-2025.lic'
         required: true
         type: string
+        default: 'contrast-12-31-2025.lic'
+      lib_filename:
+        description: 'Lib FileName e.g., Contrast-Data-Export-202504211116.zip'
+        required: false
+        type: string
 
 permissions:
   id-token: write

@@ -1,0 +1,14 @@
+services:
+  log_monitor:
+    container_name: log_monitor
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - TZ=Asia/Tokyo
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./lib_folder_check.py:/app/lib_folder_check.py
+    command: ["python", "/app/lib_folder_check.py"]
+    restart: "no"
+

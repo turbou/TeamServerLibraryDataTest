@@ -190,11 +190,11 @@ jobs:
 
       - name: Reconfigure response.varfile
         run: |
-          PIP="${{ steps.get_instance_details.outputs.PIP }}"
+          EIP="${{ steps.get_instance_details.outputs.EIP }}"
           aws ssm send-command \
             --instance-ids "${{ github.event.inputs.instance_id }}" \
             --document-name "AWS-RunShellScript" \
-            --parameters "commands=[\"sudo sed -i -e 's#licenseFileLocation=.*\$#licenseFileLocation=/opt/contrast/work/${{ github.event.inputs.lic_filename }}#' -e 's#teamserver_url=.*\$#teamserver_url=http://$PIP/Contrast#' /root/git/TeamServerLibraryDataTest/bare-metal/response.varfile\"]" \
+            --parameters "commands=[\"sudo sed -i -e 's#licenseFileLocation=.*\$#licenseFileLocation=/opt/contrast/work/${{ github.event.inputs.lic_filename }}#' -e 's#teamserver_url=.*\$#teamserver_url=http://$EIP/Contrast#' /root/git/TeamServerLibraryDataTest/bare-metal/response.varfile\"]" \
             --output text
           echo "PIP=$PIP" >> $GITHUB_OUTPUT
           echo "EIP=$EIP" >> $GITHUB_OUTPUT

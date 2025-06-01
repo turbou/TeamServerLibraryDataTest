@@ -122,7 +122,7 @@ jobs:
             --output text
           echo "Successfully sent command to reconfigure contrast url on instance: ${{ github.event.inputs.instance_id }}"
 
-      - name: Hub Access Off 
+      - name: Hub Access Off
         id: hub_access_off
         run: |
           aws ssm send-command \
@@ -130,7 +130,7 @@ jobs:
             --document-name "AWS-RunShellScript" \
             --parameters "commands=[\"sudo -i bash -c 'cd /root/git/TeamServerLibraryDataTest/playwright_hub_off && docker-compose -p eop run --rm playwright_hub_off'\"]" \
             --output text
-          echo "Successfully sent command to hub access off on instance: ${{ github.event.inputs.instance_id }}" 
+          echo "Successfully sent command to hub access off on instance: ${{ github.event.inputs.instance_id }}"
 
       - name: Create Organization
         id: create_organization

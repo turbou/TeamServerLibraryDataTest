@@ -59,7 +59,7 @@ jobs:
           echo "Successfully sent command to clean up on instance: ${{ github.event.inputs.instance_id }}"
 
       - name: Wait for CleanUp Completion Check
-        id: wait_command_for_download_installer
+        id: wait_command_for_cleanup
         run: |
           COMMAND_ID="${{ steps.clean_up.outputs.COMMAND_ID }}"
           echo "Waiting for command ID: $COMMAND_ID to complete..."

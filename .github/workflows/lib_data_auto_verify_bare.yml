@@ -92,6 +92,11 @@ jobs:
             --document-name "AWS-RunShellScript" \
             --parameters "commands=[\"sudo sed -i -e 's#INSTANCE_ID=.*\$#INSTANCE_ID=${{ github.event.inputs.instance_id }}#' -e 's#INSTANCE_TYPE=.*\$#INSTANCE_TYPE=$INSTANCE_TYPE#' -e 's#EIP=.*\$#EIP=$EIP#' -e 's#PIP=.*\$#PIP=$PIP#' -e 's#SH_FILE_NAME=.*\$#SH_FILE_NAME=${{ github.event.inputs.sh_filename }}#' -e 's#LIC_FILE_NAME=.*\$#LIC_FILE_NAME=${{ github.event.inputs.lic_filename }}#' /root/git/TeamServerLibraryDataTest/log_monitor_bare/.env\"]" \
             --output text
+          aws ssm send-command \
+            --instance-ids "${{ github.event.inputs.instance_id }}" \
+            --document-name "AWS-RunShellScript" \
+            --parameters "commands=[\"sudo sed -i -e 's#proxy_pass.*\$#proxy_pass          http://$PIP:8080;#' /root/git/TeamServerLibraryDataTest/bare-metal/nginx_conf/default.conf\"]" \
+            --output text
           echo "PIP=$PIP" >> $GITHUB_OUTPUT
           echo "EIP=$EIP" >> $GITHUB_OUTPUT
           echo "Successfully sent command to update file on instance: ${{ github.event.inputs.instance_id }}"

@@ -211,7 +211,7 @@ jobs:
           COMMAND_ID=$(aws ssm send-command \
             --instance-ids "${{ github.event.inputs.instance_id }}" \
             --document-name "AWS-RunShellScript" \
-            --parameters "commands=[\"sudo -i bash -c 'cd /root/git/TeamServerLibraryDataTest/bare && ./started_check.sh'\"]" \
+            --parameters "commands=[\"sudo -i bash -c 'cd /root/git/TeamServerLibraryDataTest/bare-metal && ./started_check.sh'\"]" \
             --output json | jq -r '.Command.CommandId')
           echo "COMMAND_ID=$COMMAND_ID" >> $GITHUB_OUTPUT
           echo "Successfully sent command to confirm TeamServer started on instance: ${{ github.event.inputs.instance_id }}"
@@ -240,7 +240,7 @@ jobs:
           aws ssm send-command \
             --instance-ids "${{ github.event.inputs.instance_id }}" \
             --document-name "AWS-RunShellScript" \
-            --parameters "commands=[\"sudo -i bash -c 'cd /root/git/TeamServerLibraryDataTest/bare && docker-compose -p bare up'\"]" \
+            --parameters "commands=[\"sudo -i bash -c 'cd /root/git/TeamServerLibraryDataTest/bare-metal && docker-compose -p bare up'\"]" \
             --output text
           echo "Successfully sent command to launch other container on instance: ${{ github.event.inputs.instance_id }}"
 

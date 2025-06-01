@@ -3,8 +3,8 @@
 MAX_RETRIES=20
 SLEEP_SECONDS=30
 for i in $(seq 1 $MAX_RETRIES); do
-  LOGS=$(docker-compose -p eop logs teamserver)
-  if echo "$LOGS" | grep -q " started on "; then
+  LOGS=$(cat /opt/contrast/logs/server.log)
+  if echo "$LOGS" | grep -q "Contrast TeamServer Ready"; then
     echo "TeamServer started successfully."
     break
   fi  

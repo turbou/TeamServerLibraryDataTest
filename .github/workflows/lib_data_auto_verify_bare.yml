@@ -76,7 +76,7 @@ jobs:
             sleep 30
           done
 
-      - name: Get Instance Type, Private IP and Elastic IP 
+      - name: Get Instance Type, Private IP and Elastic IP
         id: get_instance_details
         run: |
           INSTANCE_TYPE=$(aws ec2 describe-instances --instance-ids "${{ github.event.inputs.instance_id }}" --query 'Reservations[*].Instances[*].InstanceType' --output text)
@@ -205,73 +205,78 @@ jobs:
             --output text
           echo "Successfully sent command to Install Contrast on instance: ${{ github.event.inputs.instance_id }}"
 
-#      - name: TeamServer Running Status Check
-#        id: check_for_startup
-#        run: |
-#          COMMAND_ID=$(aws ssm send-command \
-#            --instance-ids "${{ github.event.inputs.instance_id }}" \
-#            --document-name "AWS-RunShellScript" \
-#            --parameters "commands=[\"sudo -i bash -c 'cd /root/git/TeamServerLibraryDataTest/eop && ./started_check.sh'\"]" \
-#            --output json | jq -r '.Command.CommandId')
-#          echo "COMMAND_ID=$COMMAND_ID" >> $GITHUB_OUTPUT
-#          echo "Successfully sent command to confirm TeamServer started on instance: ${{ github.event.inputs.instance_id }}"
-#
-#      - name: Wait for TeamServer Running Status Check
-#        id: wait_command_for_started
-#        run: |
-#          COMMAND_ID="${{ steps.check_for_startup.outputs.COMMAND_ID }}"
-#          echo "Waiting for command ID: $COMMAND_ID to complete..."
-#          while true; do
-#            STATUS=$(aws ssm get-command-invocation \
-#              --command-id "$COMMAND_ID" \
-#              --instance-id "${{ github.event.inputs.instance_id }}" \
-#              --output json | jq -r '.Status')
-#            echo "Current Status: $STATUS"
-#            if [[ "$STATUS" == "Success" || "$STATUS" == "Failed" || "$STATUS" == "Cancelled" || "$STATUS" == "TimedOut" ]]; then
-#              echo "Command execution finished with status: $STATUS"
-#              break
-#            fi
-#            sleep 30
-#          done
-#
-#      - name: Reconfigure Contrast URL
-#        run: |
-#          aws ssm send-command \
-#            --instance-ids "${{ github.event.inputs.instance_id }}" \
-#            --document-name "AWS-RunShellScript" \
-#            --parameters "commands=[\"sudo -i bash -c 'cd /root/git/TeamServerLibraryDataTest/eop && ./reconfigure_contrast_url.sh ${{ steps.get_instance_details.outputs.EIP }}'\"]" \
-#            --output text
-#          echo "Successfully sent command to reconfigure contrast url on instance: ${{ github.event.inputs.instance_id }}"
-#
-#      - name: Hub Access Off 
-#        id: hub_access_off
-#        run: |
-#          aws ssm send-command \
-#            --instance-ids "${{ github.event.inputs.instance_id }}" \
-#            --document-name "AWS-RunShellScript" \
-#            --parameters "commands=[\"sudo -i bash -c 'cd /root/git/TeamServerLibraryDataTest/playwright_hub_off && docker-compose -p eop up'\"]" \
-#            --output text
-#          echo "Successfully sent command to hub access off on instance: ${{ github.event.inputs.instance_id }}" 
-#
-#      - name: Create Organization
-#        id: create_organization
-#        run: |
-#          aws ssm send-command \
-#            --instance-ids "${{ github.event.inputs.instance_id }}" \
-#            --document-name "AWS-RunShellScript" \
-#            --parameters "commands=[\"sudo -i bash -c 'cd /root/git/TeamServerLibraryDataTest/playwright_create_org && docker-compose -p eop up'\"]" \
-#            --output text
-#          echo "Successfully sent command to create organization on instance: ${{ github.event.inputs.instance_id }}"
-#
-#      - name: Reconfigure Library Data Filename
-#        run: |
-#          aws ssm send-command \
-#            --instance-ids "${{ github.event.inputs.instance_id }}" \
-#            --document-name "AWS-RunShellScript" \
-#            --parameters "commands=[\"sudo sed -i 's#FILE_NAME=.*\$#FILE_NAME=${{ github.event.inputs.lib_filename }}#' /root/git/TeamServerLibraryDataTest/playwright_dl_lib_data/lib_data.env\"]" \
-#            --output text
-#          echo "Successfully sent command to update file on instance: ${{ github.event.inputs.instance_id }}"
-#
+      - name: TeamServer Running Status Check
+        id: check_for_startup
+        run: |
+          COMMAND_ID=$(aws ssm send-command \
+            --instance-ids "${{ github.event.inputs.instance_id }}" \
+            --document-name "AWS-RunShellScript" \
+            --parameters "commands=[\"sudo -i bash -c 'cd /root/git/TeamServerLibraryDataTest/bare && ./started_check.sh'\"]" \
+            --output json | jq -r '.Command.CommandId')
+          echo "COMMAND_ID=$COMMAND_ID" >> $GITHUB_OUTPUT
+          echo "Successfully sent command to confirm TeamServer started on instance: ${{ github.event.inputs.instance_id }}"
+
+      - name: Wait for TeamServer Running Status Check
+        id: wait_command_for_started
+        run: |
+          COMMAND_ID="${{ steps.check_for_startup.outputs.COMMAND_ID }}"
+          echo "Waiting for command ID: $COMMAND_ID to complete..."
+          while true; do
+            STATUS=$(aws ssm get-command-invocation \
+              --command-id "$COMMAND_ID" \
+              --instance-id "${{ github.event.inputs.instance_id }}" \
+              --output json | jq -r '.Status')
+            echo "Current Status: $STATUS"
+            if [[ "$STATUS" == "Success" || "$STATUS" == "Failed" || "$STATUS" == "Cancelled" || "$STATUS" == "TimedOut" ]]; then
+              echo "Command execution finished with status: $STATUS"
+              break
+            fi
+            sleep 30
+          done
+
+      - name: Other Container Startup
+        id: other_container_up
+        run: |
+          aws ssm send-command \
+            --instance-ids "${{ github.event.inputs.instance_id }}" \
+            --document-name "AWS-RunShellScript" \
+            --parameters "commands=[\"sudo -i bash -c 'cd /root/git/TeamServerLibraryDataTest/bare && docker-compose -p bare up'\"]" \
+            --output text
+          echo "Successfully sent command to launch other container on instance: ${{ github.event.inputs.instance_id }}"
+
+      - name: Sleep for Waiting Container StartUp 30 seconds
+        run: sleep 30s
+        shell: bash
+
+      - name: Hub Access Off
+        id: hub_access_off
+        run: |
+          aws ssm send-command \
+            --instance-ids "${{ github.event.inputs.instance_id }}" \
+            --document-name "AWS-RunShellScript" \
+            --parameters "commands=[\"sudo -i bash -c 'cd /root/git/TeamServerLibraryDataTest/playwright_hub_off && docker-compose -p bare run --rm playwright_hub_off'\"]" \
+            --output text
+          echo "Successfully sent command to hub access off on instance: ${{ github.event.inputs.instance_id }}"
+
+      - name: Create Organization
+        id: create_organization
+        run: |
+          aws ssm send-command \
+            --instance-ids "${{ github.event.inputs.instance_id }}" \
+            --document-name "AWS-RunShellScript" \
+            --parameters "commands=[\"sudo -i bash -c 'cd /root/git/TeamServerLibraryDataTest/playwright_create_org && docker-compose -p bare run --rm playwright_create_org'\"]" \
+            --output text
+          echo "Successfully sent command to create organization on instance: ${{ github.event.inputs.instance_id }}"
+
+      - name: Reconfigure Library Data Filename
+        run: |
+          aws ssm send-command \
+            --instance-ids "${{ github.event.inputs.instance_id }}" \
+            --document-name "AWS-RunShellScript" \
+            --parameters "commands=[\"sudo sed -i 's#FILE_NAME=.*\$#FILE_NAME=${{ github.event.inputs.lib_filename }}#' /root/git/TeamServerLibraryDataTest/playwright_dl_lib_data/lib_data.env\"]" \
+            --output text
+          echo "Successfully sent command to update file on instance: ${{ github.event.inputs.instance_id }}"
+
 #      - name: Download Library Data via Playwright Container
 #        id: library_data_download
 #        run: |

@@ -9,9 +9,9 @@ services:
       - INSTANCE_ID=${INSTANCE_ID:?err}
       - INSTANCE_TYPE=${INSTANCE_TYPE:?err}
       - EIP=${EIP:?err}
-      - FILE_NAME=${FILE_NAME:?err}
-      - EOP_VERSION=${EOP_VERSION:?err}
-      - MYSQL_VERSION=${MYSQL_VERSION:?err}
+      - PIP=${PIP:?err}
+      - SH_FILE_NAME=${SH_FILE_NAME:?err}
+      - LIC_FILE_NAME=${LIC_FILE_NAME:?err}
       - LOG_FILE_PATH=/work/server.log
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro

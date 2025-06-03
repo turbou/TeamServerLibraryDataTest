@@ -9,7 +9,7 @@ from datetime import datetime
 def post_slack_message(message):
     headers = {'Content-Type': 'application/json'}
     try:
-        response = requests.post('https://hooks.slack.com/triggers/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', headers=headers, data=json.dumps(message))
+        response = requests.post('https://hooks.slack.com/triggers/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', headers=headers, data=json.dumps(message))
         response.raise_for_status()
         print("Message sent to Slack workflow successfully.")
     except requests.exceptions.RequestException as e:
@@ -124,8 +124,9 @@ def monitor_logs():
                             "INSTANCE_ID": os.environ['INSTANCE_ID'],
                             "INSTANCE_TYPE":  os.environ['INSTANCE_TYPE'],
                             "EIP":  os.environ['EIP'],
-                            "SH_FILE_NAME":  os.environ['SH_FILE_NAME'],
-                            "LIC_FILE_NAME":  os.environ['LIC_FILE_NAME']
+                            "SHL_FILE_NAME":  os.environ['SHL_FILE_NAME'],
+                            "LIC_FILE_NAME":  os.environ['LIC_FILE_NAME'],
+                            "LIB_FILE_NAME":  os.environ['LIB_FILE_NAME']
                         }
                         #post_slack_message(message)
                         return
@@ -137,7 +138,7 @@ def monitor_logs():
 if __name__ == "__main__":
     print("Log monitor started.")
     env_not_found = False
-    for env_key in ['INSTANCE_ID', 'INSTANCE_TYPE', 'EIP', 'SH_FILE_NAME', 'LIC_FILE_NAME']:
+    for env_key in ['INSTANCE_ID', 'INSTANCE_TYPE', 'EIP', 'SHL_FILE_NAME', 'LIC_FILE_NAME', 'LIB_FILE_NAME']:
         if not env_key in os.environ:
             print('Environment variable %s is not set' % env_key)
             env_not_found |= True

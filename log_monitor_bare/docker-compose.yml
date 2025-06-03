@@ -10,8 +10,9 @@ services:
       - INSTANCE_TYPE=${INSTANCE_TYPE:?err}
       - EIP=${EIP:?err}
       - PIP=${PIP:?err}
-      - SH_FILE_NAME=${SH_FILE_NAME:?err}
+      - SHL_FILE_NAME=${SHL_FILE_NAME:?err}
       - LIC_FILE_NAME=${LIC_FILE_NAME:?err}
+      - LIB_FILE_NAME=${LIB_FILE_NAME:?err}
       - LOG_FILE_PATH=/work/server.log
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro

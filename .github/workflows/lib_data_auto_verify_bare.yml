@@ -8,7 +8,7 @@ on:
         required: true
         type: string
         default: 'i-0d3fdfef1d70fecfe'
-      sh_filename:
+      shl_filename:
         description: 'Installer FileName e.g., Contrast-3.12.2.14624363708-NO-CACHE.sh'
         required: true
         type: string
@@ -34,8 +34,9 @@ jobs:
         run: |
           echo "--------------- Input Parameters ---------------"
           echo "EC2 Instance Id    : ${{ github.event.inputs.instance_id}}"
-          echo "Installer FileName : ${{ github.event.inputs.sh_filename }}"
+          echo "Installer FileName : ${{ github.event.inputs.shl_filename }}"
           echo "License FileName   : ${{ github.event.inputs.lic_filename }}"
+          echo "Lib FileName       : ${{ github.event.inputs.lib_filename }}"
           echo "------------------------------------------------"
 
       - name: Checkout repository
@@ -90,7 +91,7 @@ jobs:
           aws ssm send-command \
             --instance-ids "${{ github.event.inputs.instance_id }}" \
             --document-name "AWS-RunShellScript" \
-            --parameters "commands=[\"sudo sed -i -e 's#INSTANCE_ID=.*\$#INSTANCE_ID=${{ github.event.inputs.instance_id }}#' -e 's#INSTANCE_TYPE=.*\$#INSTANCE_TYPE=$INSTANCE_TYPE#' -e 's#EIP=.*\$#EIP=$EIP#' -e 's#PIP=.*\$#PIP=$PIP#' -e 's#SH_FILE_NAME=.*\$#SH_FILE_NAME=${{ github.event.inputs.sh_filename }}#' -e 's#LIC_FILE_NAME=.*\$#LIC_FILE_NAME=${{ github.event.inputs.lic_filename }}#' /root/git/TeamServerLibraryDataTest/log_monitor_bare/.env\"]" \
+            --parameters "commands=[\"sudo sed -i -e 's#INSTANCE_ID=.*\$#INSTANCE_ID=${{ github.event.inputs.instance_id }}#' -e 's#INSTANCE_TYPE=.*\$#INSTANCE_TYPE=$INSTANCE_TYPE#' -e 's#EIP=.*\$#EIP=$EIP#' -e 's#PIP=.*\$#PIP=$PIP#' -e 's#SHL_FILE_NAME=.*\$#SHL_FILE_NAME=${{ github.event.inputs.shl_filename }}#' -e 's#LIC_FILE_NAME=.*\$#LIC_FILE_NAME=${{ github.event.inputs.lic_filename }}#' -e 's#LIB_FILE_NAME=.*\$#LIB_FILE_NAME=${{ github.event.inputs.lib_filename }}#' /root/git/TeamServerLibraryDataTest/log_monitor_bare/.env\"]" \
             --output text
           aws ssm send-command \
             --instance-ids "${{ github.event.inputs.instance_id }}" \
@@ -106,7 +107,7 @@ jobs:
           aws ssm send-command \
             --instance-ids "${{ github.event.inputs.instance_id }}" \
             --document-name "AWS-RunShellScript" \
-            --parameters "commands=[\"sudo sed -i 's#FILE_NAME=.*\$#FILE_NAME=${{ github.event.inputs.sh_filename }}#' /root/git/TeamServerLibraryDataTest/playwright_dl_installer/installer.env\"]" \
+            --parameters "commands=[\"sudo sed -i 's#FILE_NAME=.*\$#FILE_NAME=${{ github.event.inputs.shl_filename }}#' /root/git/TeamServerLibraryDataTest/playwright_dl_installer/installer.env\"]" \
             --output text
           echo "Successfully sent command to update file on instance: ${{ github.event.inputs.instance_id }}"
 
@@ -126,7 +127,7 @@ jobs:
           COMMAND_ID=$(aws ssm send-command \
             --instance-ids "${{ github.event.inputs.instance_id }}" \
             --document-name "AWS-RunShellScript" \
-            --parameters "commands=[\"sudo -i bash -c 'cd /root/git/TeamServerLibraryDataTest/playwright_dl_installer && ./md5sum_check.sh ${{ github.event.inputs.sh_filename }}'\"]" \
+            --parameters "commands=[\"sudo -i bash -c 'cd /root/git/TeamServerLibraryDataTest/playwright_dl_installer && ./md5sum_check.sh ${{ github.event.inputs.shl_filename }}'\"]" \
             --output json | jq -r '.Command.CommandId')
           echo "COMMAND_ID=$COMMAND_ID" >> $GITHUB_OUTPUT
           echo "Successfully sent command to confirm Installer Downloaded on instance: ${{ github.event.inputs.instance_id }}"
@@ -206,7 +207,7 @@ jobs:
           aws ssm send-command \
             --instance-ids "${{ github.event.inputs.instance_id }}" \
             --document-name "AWS-RunShellScript" \
-            --parameters "commands=[\"sudo -i bash -c 'chmod a+x /opt/contrast/work/${{ github.event.inputs.sh_filename }} && /opt/contrast/work/${{ github.event.inputs.sh_filename }} -varfile /root/git/TeamServerLibraryDataTest/bare-metal/response.varfile -overwrite -q'\"]" \
+            --parameters "commands=[\"sudo -i bash -c 'chmod a+x /opt/contrast/work/${{ github.event.inputs.shl_filename }} && /opt/contrast/work/${{ github.event.inputs.shl_filename }} -varfile /root/git/TeamServerLibraryDataTest/bare-metal/response.varfile -overwrite -q'\"]" \
             --output text
           echo "Successfully sent command to Install Contrast on instance: ${{ github.event.inputs.instance_id }}"
 

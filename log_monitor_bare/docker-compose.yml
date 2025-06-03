@@ -12,8 +12,10 @@ services:
       - FILE_NAME=${FILE_NAME:?err}
       - EOP_VERSION=${EOP_VERSION:?err}
       - MYSQL_VERSION=${MYSQL_VERSION:?err}
+      - LOG_FILE_PATH=/work/server.log
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /opt/contrast/logs/server.log:/work/server.log:ro
       - ./log_monitor.py:/app/log_monitor.py
     command: ["python", "/app/log_monitor.py"]
     restart: "no"

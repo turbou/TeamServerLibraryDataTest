@@ -1,4 +1,4 @@
-name: Library Data Auto-Validation on Docker
+name: TeamServer Startup with Port
 
 on:
   workflow_dispatch:
@@ -27,7 +27,7 @@ permissions:
   contents: read
 
 jobs:
-  lib_data_auto_verify:
+  teamserver_startup:
     runs-on: ubuntu-latest
     steps:
       - name: Output Input Parameters

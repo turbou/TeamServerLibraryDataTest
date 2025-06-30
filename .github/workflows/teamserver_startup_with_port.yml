@@ -1,0 +1,144 @@
+name: Library Data Auto-Validation on Docker
+
+on:
+  workflow_dispatch:
+    inputs:
+      instance_id:
+        description: 'EC2 Instance ID'
+        required: true
+        type: string
+        default: 'i-0df6b98aa8d86e49d'
+      eop_version:
+        description: 'EOP Version e.g., 3.12.0.13568004691'
+        required: true
+        type: string
+      mysql_version:
+        description: 'MySQL Docker Version e.g., 8.4.4'
+        required: true
+        type: string
+        default: '8.4.4'
+      lib_filename:
+        description: 'Lib FileName e.g., Contrast-Data-Export-202504211116.zip'
+        required: true
+        type: string
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  lib_data_auto_verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Output Input Parameters
+        run: |
+          echo "--------------- Input Parameters ---------------"
+          echo "EC2 Instance Id: ${{ github.event.inputs.instance_id}}"
+          echo "EOP Version    : ${{ github.event.inputs.eop_version }}"
+          echo "MySQL Version  : ${{ github.event.inputs.mysql_version }}"
+          echo "Lib FileName   : ${{ github.event.inputs.lib_filename }}"
+          echo "------------------------------------------------"
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ap-northeast-1
+
+      - name: Get Instance Type and Elastic IP
+        id: get_instance_details
+        run: |
+          INSTANCE_TYPE=$(aws ec2 describe-instances --instance-ids "${{ github.event.inputs.instance_id }}" --query 'Reservations[*].Instances[*].InstanceType' --output text)
+          EIP=$(aws ec2 describe-addresses --filters "Name=instance-id,Values=${{ github.event.inputs.instance_id }}" --query 'Addresses[*].PublicIp' --output text)
+          echo "--------------- Instance Information ---------------"
+          echo "EC2 Instance Type: $INSTANCE_TYPE"
+          echo "Elastic IP       : $EIP"
+          echo "------------------------------------------------"
+          aws ssm send-command \
+            --instance-ids "${{ github.event.inputs.instance_id }}" \
+            --document-name "AWS-RunShellScript" \
+            --parameters "commands=[\"sudo sed -i -e 's#INSTANCE_ID=.*\$#INSTANCE_ID=${{ github.event.inputs.instance_id }}#' -e 's#INSTANCE_TYPE=.*\$#INSTANCE_TYPE=$INSTANCE_TYPE#' -e 's#EIP=.*\$#EIP=$EIP#' -e 's#FILE_NAME=.*\$#FILE_NAME=${{ github.event.inputs.lib_filename }}#' -e 's#EOP_VERSION=.*\$#EOP_VERSION=${{ github.event.inputs.eop_version }}#' -e 's#MYSQL_VERSION=.*\$#MYSQL_VERSION=${{ github.event.inputs.mysql_version }}#' /root/git/TeamServerLibraryDataTest/log_monitor/.env\"]" \
+            --output text
+          echo "EIP=$EIP" >> $GITHUB_OUTPUT
+          echo "Successfully sent command to update file on instance: ${{ github.event.inputs.instance_id }}"
+
+      - name: Reconfigure EOP Version
+        run: |
+          aws ssm send-command \
+            --instance-ids "${{ github.event.inputs.instance_id }}" \
+            --document-name "AWS-RunShellScript" \
+            --parameters "commands=[\"sudo sed -i -e 's#EOP_VERSION=.*\$#EOP_VERSION=${{ github.event.inputs.eop_version }}#' -e 's#MYSQL_VERSION=.*\$#MYSQL_VERSION=${{ github.event.inputs.mysql_version }}#' /root/git/TeamServerLibraryDataTest/eop/.env\"]" \
+            --output text
+          echo "Successfully sent command to update file on instance: ${{ github.event.inputs.instance_id }}"
+
+      - name: TeamServer Container Startup
+        id: teamserver_up
+        run: |
+          aws ssm send-command \
+            --instance-ids "${{ github.event.inputs.instance_id }}" \
+            --document-name "AWS-RunShellScript" \
+            --parameters "commands=[\"sudo -i bash -c 'cd /root/git/TeamServerLibraryDataTest/eop && docker-compose -p eop -f docker-compose_with_port.yml up'\"]" \
+            --output text
+          echo "Successfully sent command to launch TeamServer on instance: ${{ github.event.inputs.instance_id }}"
+
+      - name: TeamServer Running Status Check
+        id: check_for_startup
+        run: |
+          COMMAND_ID=$(aws ssm send-command \
+            --instance-ids "${{ github.event.inputs.instance_id }}" \
+            --document-name "AWS-RunShellScript" \
+            --parameters "commands=[\"sudo -i bash -c 'cd /root/git/TeamServerLibraryDataTest/eop && ./started_check.sh'\"]" \
+            --output json | jq -r '.Command.CommandId')
+          echo "COMMAND_ID=$COMMAND_ID" >> $GITHUB_OUTPUT
+          echo "Successfully sent command to confirm TeamServer started on instance: ${{ github.event.inputs.instance_id }}"
+
+      - name: Wait for TeamServer Running Status Check
+        id: wait_command_for_started
+        run: |
+          COMMAND_ID="${{ steps.check_for_startup.outputs.COMMAND_ID }}"
+          echo "Waiting for command ID: $COMMAND_ID to complete..."
+          while true; do
+            STATUS=$(aws ssm get-command-invocation \
+              --command-id "$COMMAND_ID" \
+              --instance-id "${{ github.event.inputs.instance_id }}" \
+              --output json | jq -r '.Status')
+            echo "Current Status: $STATUS"
+            if [[ "$STATUS" == "Success" || "$STATUS" == "Failed" || "$STATUS" == "Cancelled" || "$STATUS" == "TimedOut" ]]; then
+              echo "Command execution finished with status: $STATUS"
+              break
+            fi
+            sleep 30
+          done
+
+      - name: Reconfigure Contrast URL
+        run: |
+          aws ssm send-command \
+            --instance-ids "${{ github.event.inputs.instance_id }}" \
+            --document-name "AWS-RunShellScript" \
+            --parameters "commands=[\"sudo -i bash -c 'cd /root/git/TeamServerLibraryDataTest/eop && ./reconfigure_contrast_url.sh ${{ steps.get_instance_details.outputs.EIP }}'\"]" \
+            --output text
+          echo "Successfully sent command to reconfigure contrast url on instance: ${{ github.event.inputs.instance_id }}"
+
+      - name: Hub Access Off
+        id: hub_access_off
+        run: |
+          aws ssm send-command \
+            --instance-ids "${{ github.event.inputs.instance_id }}" \
+            --document-name "AWS-RunShellScript" \
+            --parameters "commands=[\"sudo -i bash -c 'cd /root/git/TeamServerLibraryDataTest/playwright_hub_off && docker-compose -p eop run --rm playwright_hub_off'\"]" \
+            --output text
+          echo "Successfully sent command to hub access off on instance: ${{ github.event.inputs.instance_id }}"
+
+      - name: Create Organization
+        id: create_organization
+        run: |
+          aws ssm send-command \
+            --instance-ids "${{ github.event.inputs.instance_id }}" \
+            --document-name "AWS-RunShellScript" \
+            --parameters "commands=[\"sudo -i bash -c 'cd /root/git/TeamServerLibraryDataTest/playwright_create_org && docker-compose -p eop run --rm playwright_create_org'\"]" \
+            --output text
+          echo "Successfully sent command to create organization on instance: ${{ github.event.inputs.instance_id }}"
+
